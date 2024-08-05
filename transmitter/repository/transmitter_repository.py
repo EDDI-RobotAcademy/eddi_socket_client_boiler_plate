@@ -9,3 +9,7 @@ class TransmitterRepository(ABC):
     @abstractmethod
     def requestToTransmitResult(self):
         pass
+
+    @abstractmethod
+    def transmit(self, serializedTransmitData):
+        pass

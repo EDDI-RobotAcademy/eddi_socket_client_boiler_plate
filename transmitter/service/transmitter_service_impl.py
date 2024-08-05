@@ -37,6 +37,28 @@ class TransmitterServiceImpl(TransmitterService):
         while self.__blockToAcquireSocket():
             sleep(0.5)
 
+        # clientSocket = self.__transmitterRepository.getClientSocket()
+        # clientSocketObject = clientSocket.getSocket()
+
+        while True:
+            try:
+                transmitData = "test"
+                serializedData = json.dumps({"message": transmitData})
+
+                # clientSocketObject.sendall(serializedData.encode())
+                self.__transmitterRepository.transmit(serializedData)
+
+            except (socket.error, BrokenPipeError) as exception:
+                return None
+
+            except socket.error as exception:
+                print("전송 중 에러")
+
+            except Exception as exception:
+                print(f"Transmitter: {str(exception)}")
+
+            finally:
+                sleep(0.5)
 
 
 

@@ -29,4 +29,10 @@ class TransmitterRepositoryImpl(TransmitterRepository):
     def requestToTransmitResult(self):
         pass
 
+    def transmit(self, serializedTransmitData):
+        clientSocketObject = self.__clientSocket.getSocket()
+        clientSocketObject.sendall(serializedTransmitData.encode())
+
+
+
 
