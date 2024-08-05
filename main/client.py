@@ -25,3 +25,6 @@ if __name__ == "__main__":
     taskWorkerService = TaskWorkerServiceImpl.getInstance()
     taskWorkerService.createTaskWorker("Transmitter", transmitterService.requestToTransmitResult)
     taskWorkerService.executeTaskWorker("Transmitter")
+
+    taskWorkerService.createTaskWorker("Receiver", receiverService.requestToReceiveCommand)
+    taskWorkerService.executeTaskWorker("Receiver")

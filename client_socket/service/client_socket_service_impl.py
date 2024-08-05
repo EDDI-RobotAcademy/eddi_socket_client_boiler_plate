@@ -1,5 +1,6 @@
 from client_socket.repository.client_socket_repository_impl import ClientSocketRepositoryImpl
 from client_socket.service.client_socket_service import ClientSocketService
+from utility.color_print import ColorPrinter
 
 
 class ClientSocketServiceImpl(ClientSocketService):
@@ -24,4 +25,6 @@ class ClientSocketServiceImpl(ClientSocketService):
 
     def connectToTargetHostUnitlSuccess(self):
         self.__clientSocketRepository.connectToTargetHostUnitlSuccess()
+
+        ColorPrinter.print_important_message("서버에 접속 성공!")
 

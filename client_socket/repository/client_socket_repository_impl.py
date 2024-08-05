@@ -28,6 +28,9 @@ class ClientSocketRepositoryImpl(ClientSocketRepository):
         self.__clientSocket = ClientSocket(config('TARGET_HOST'), int(config('TARGET_PORT')), clientSocketObject)
         return self.__clientSocket
 
+    def __setNonBlocking(self, socketObject):
+        socketObject.setblocking(False)
+
     def connectToTargetHostUnitlSuccess(self):
         if not self.__clientSocket:
             self.create()
@@ -41,7 +44,8 @@ class ClientSocketRepositoryImpl(ClientSocketRepository):
                     self.__clientSocket.getPort(),
                 )
             )
-            
+            self.__setNonBlocking(clientSocketObject)
+
         except ConnectionRefusedError:
             print(f"{self.__clientSocket.getHost()}:{self.__clientSocket.getPort()} 연결 중 거절")
 

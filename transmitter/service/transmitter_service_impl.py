@@ -37,8 +37,7 @@ class TransmitterServiceImpl(TransmitterService):
         while self.__blockToAcquireSocket():
             sleep(0.5)
 
-        # clientSocket = self.__transmitterRepository.getClientSocket()
-        # clientSocketObject = clientSocket.getSocket()
+        ColorPrinter.print_important_message("Transmitter 생성 성공!")
 
         while True:
             try:
