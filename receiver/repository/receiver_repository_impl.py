@@ -29,7 +29,8 @@ class ReceiverRepositoryImpl(ReceiverRepository):
 
     def receive(self):
         clientSocketObject = self.__clientSocket.getSocket()
-        clientSocketObject.recv(self.SOCKET_BUFFER_SIZE)
+        receivedData = clientSocketObject.recv(self.SOCKET_BUFFER_SIZE)
+        return receivedData
 
     def closeConnection(self):
         ColorPrinter.print_important_message("Receiver 소켓 종료!")

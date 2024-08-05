@@ -49,14 +49,24 @@ class ReceiverServiceImpl(ReceiverService):
                 decodedData = receivedData.decode()
                 ColorPrinter.print_important_data("수신된 정보", decodedData)
 
-            except (socket.error, BrokenPipeError) as exception:
-                return None
+            except BlockingIOError:
+                pass
 
-            except socket.error as exception:
-                print("전송 중 에러")
+            except (socket.error, BrokenPipeError) as exception:
+                ColorPrinter.print_important_message("Broken Pipe")
+                self.__receiverRepository.closeConnection()
+                break
+
+            except socket.error as socketException:
+                if socketException.errno == socket.errno.EAGAIN == socket.errno.EWOULDBLOCK:
+                    ColorPrinter.print_important_message("문제 없음")
+                    sleep(0.5)
+
+                else:
+                    ColorPrinter.print_important_message("수신 중 에러")
 
             except Exception as exception:
-                print(f"Transmitter: {str(exception)}")
+                ColorPrinter.print_important_data("Receiver 정보", str(exception))
 
             finally:
                 sleep(0.5)
