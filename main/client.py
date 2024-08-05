@@ -3,6 +3,7 @@ import colorama
 from client_socket.service.client_socket_service_impl import ClientSocketServiceImpl
 from initializer.init_domain import DomainInitializer
 from receiver.service.receiver_service_impl import ReceiverServiceImpl
+from task_worker.service.task_worker_service_impl import TaskWorkerServiceImpl
 from transmitter.service.transmitter_service_impl import TransmitterServiceImpl
 
 
@@ -20,3 +21,7 @@ if __name__ == "__main__":
 
     receiverService = ReceiverServiceImpl.getInstance()
     receiverService.requestToInjectClientSocket(clientSocket)
+
+    taskWorkerService = TaskWorkerServiceImpl.getInstance()
+    taskWorkerService.createTaskWorker("Transmitter", transmitterService.requestToTransmitResult)
+    taskWorkerService.executeTaskWorker("Transmitter")

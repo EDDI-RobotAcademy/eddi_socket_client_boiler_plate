@@ -27,5 +27,16 @@ class TransmitterServiceImpl(TransmitterService):
     def requestToInjectClientSocket(self, clientSocket):
         self.__transmitterRepository.injectClientSocket(clientSocket)
 
+    def __blockToAcquireSocket(self):
+        if self.__transmitterRepository.getClientSocket() is None:
+            return True
+
+        return False
+
+    def requestToTransmitResult(self):
+        while self.__blockToAcquireSocket():
+            sleep(0.5)
+
+
 
 

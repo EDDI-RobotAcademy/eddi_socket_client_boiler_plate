@@ -1,3 +1,5 @@
+from time import sleep
+
 from transmitter.repository.transmitter_repository import TransmitterRepository
 
 
@@ -20,3 +22,11 @@ class TransmitterRepositoryImpl(TransmitterRepository):
 
     def injectClientSocket(self, clientSocket):
         self.__clientSocket = clientSocket
+
+    def getClientSocket(self):
+        return self.__clientSocket
+
+    def requestToTransmitResult(self):
+        pass
+
+

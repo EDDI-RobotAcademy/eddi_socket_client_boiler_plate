@@ -6,3 +6,6 @@ class TransmitterService(ABC):
     def requestToInjectClientSocket(self, clientSocket):
         pass
 
+    @abstractmethod
+    def requestToTransmitResult(self):
+        pass
