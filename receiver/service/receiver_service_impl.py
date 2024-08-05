@@ -25,3 +25,39 @@ class ReceiverServiceImpl(ReceiverService):
 
     def requestToInjectClientSocket(self, clientSocket):
         self.__receiverRepository.injectClientSocket(clientSocket)
+
+    def __blockToAcquireSocket(self):
+        if self.__receiverRepository.getClientSocket() is None:
+            return True
+
+        return False
+
+    def requestToReceiveCommand(self):
+        while self.__blockToAcquireSocket():
+            sleep(0.5)
+
+        ColorPrinter.print_important_message("Receiver 생성 성공!")
+
+        while True:
+            try:
+                receivedData = self.__receiverRepository.receive()
+
+                if not receivedData:
+                    self.__receiverRepository.closeConnection()
+                    break
+
+                decodedData = receivedData.decode()
+                ColorPrinter.print_important_data("수신된 정보", decodedData)
+
+            except (socket.error, BrokenPipeError) as exception:
+                return None
+
+            except socket.error as exception:
+                print("전송 중 에러")
+
+            except Exception as exception:
+                print(f"Transmitter: {str(exception)}")
+
+            finally:
+                sleep(0.5)
+

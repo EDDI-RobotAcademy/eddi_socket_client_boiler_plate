@@ -6,3 +6,10 @@ class ReceiverRepository(ABC):
     def injectClientSocket(self, clientSocket):
         pass
 
+    @abstractmethod
+    def receive(self):
+        pass
+
+    @abstractmethod
+    def closeConnection(self):
+        pass
