@@ -52,6 +52,8 @@ class ReceiverServiceImpl(ReceiverService):
                 decodedData = receivedData.decode()
                 ColorPrinter.print_important_data("수신된 정보", decodedData)
 
+                self.__receiverRepository.sendDataToCommandAnalyzer(decodedData)
+
             except BlockingIOError:
                 pass
 

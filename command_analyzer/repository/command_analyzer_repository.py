@@ -11,5 +11,9 @@ class CommandAnalyzerRepository(ABC):
         pass
 
     @abstractmethod
+    def acquireNeedToAnalysisRequestedData(self):
+        pass
+
+    @abstractmethod
     def analysis(self):
         pass
