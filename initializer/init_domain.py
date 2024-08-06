@@ -1,5 +1,6 @@
 from client_socket.service.client_socket_service_impl import ClientSocketServiceImpl
 from command_analyzer.service.command_analyzer_service_impl import CommandAnalyzerServiceImpl
+from command_executor.service.command_executor_service_impl import CommandExecutorServiceImpl
 from custom_protocol.entity.default_protocol import DefaultProtocolNumber
 from custom_protocol.service.custom_protocol_service_impl import CustomProtocolServiceImpl
 from dice.service.dice_service_impl import DiceServiceImpl
@@ -41,6 +42,10 @@ class DomainInitializer:
         CommandAnalyzerServiceImpl.getInstance()
 
     @staticmethod
+    def initCommandExecutorDomain():
+        CommandExecutorServiceImpl.getInstance()
+
+    @staticmethod
     def initTransmitterDomain():
         TransmitterServiceImpl.getInstance()
 
@@ -50,8 +55,10 @@ class DomainInitializer:
         DomainInitializer.initCustomProtocolDomain()
 
         DomainInitializer.initClientSocketDomain()
+
         DomainInitializer.initReceiverDomain()
         DomainInitializer.initCommandAnalyzerDomain()
+        DomainInitializer.initCommandExecutorDomain()
         DomainInitializer.initTransmitterDomain()
 
 
