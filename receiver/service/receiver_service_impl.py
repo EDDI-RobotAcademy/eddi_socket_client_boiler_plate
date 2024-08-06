@@ -1,6 +1,8 @@
+import json
 import socket
 from time import sleep
 
+from custom_protocol.entity.custom_protocol import CustomProtocolNumber
 from receiver.repository.receiver_repository_impl import ReceiverRepositoryImpl
 from receiver.service.receiver_service import ReceiverService
 from request_generator.generator import RequestGenerator
@@ -50,12 +52,25 @@ class ReceiverServiceImpl(ReceiverService):
                     self.__receiverRepository.closeConnection()
                     break
 
-                decodedData = receivedData.decode()
-                ColorPrinter.print_important_data("수신된 정보", decodedData)
+                # decodedData = receivedData.decode()
+                # ColorPrinter.print_important_data("수신된 정보", decodedData)
+                #
+                # requestData = RequestGenerator.generate(decodedData)
 
-                requestData = RequestGenerator.generate(decodedData)
+                dictionaryData = json.loads(receivedData)
+                protocolNumber = dictionaryData.get("protocolNumber")
+                data = dictionaryData.get("data", {})
 
-                self.__receiverRepository.sendDataToCommandAnalyzer(requestData)
+                if protocolNumber is not None:
+                    ColorPrinter.print_important_data("received protocol",
+                                                      f"Protocol Number: {protocolNumber}, Data: {data}")
+
+                    # 요청을 처리합니다.
+                    protocol = CustomProtocolNumber(protocolNumber)
+                    request = RequestGenerator.generate(protocol, data)
+                    ColorPrinter.print_important_data("processed request", f"{request}")
+
+                    self.__receiverRepository.sendDataToCommandAnalyzer(request)
 
             except BlockingIOError:
                 pass
