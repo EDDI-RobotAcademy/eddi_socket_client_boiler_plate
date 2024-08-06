@@ -3,6 +3,7 @@ from time import sleep
 
 from receiver.repository.receiver_repository_impl import ReceiverRepositoryImpl
 from receiver.service.receiver_service import ReceiverService
+from request_generator.generator import RequestGenerator
 from utility.color_print import ColorPrinter
 
 
@@ -52,7 +53,9 @@ class ReceiverServiceImpl(ReceiverService):
                 decodedData = receivedData.decode()
                 ColorPrinter.print_important_data("수신된 정보", decodedData)
 
-                self.__receiverRepository.sendDataToCommandAnalyzer(decodedData)
+                requestData = RequestGenerator.generate(decodedData)
+
+                self.__receiverRepository.sendDataToCommandAnalyzer(requestData)
 
             except BlockingIOError:
                 pass
