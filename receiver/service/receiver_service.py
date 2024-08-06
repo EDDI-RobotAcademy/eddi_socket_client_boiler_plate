@@ -7,5 +7,9 @@ class ReceiverService(ABC):
         pass
 
     @abstractmethod
+    def requestToInjectReceiverAnalyzerChannel(self, ipcReceiverAnalyzerChannel):
+        pass
+
+    @abstractmethod
     def requestToReceiveCommand(self):
         pass

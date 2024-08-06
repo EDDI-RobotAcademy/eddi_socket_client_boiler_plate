@@ -26,6 +26,9 @@ class ReceiverServiceImpl(ReceiverService):
     def requestToInjectClientSocket(self, clientSocket):
         self.__receiverRepository.injectClientSocket(clientSocket)
 
+    def requestToInjectReceiverAnalyzerChannel(self, ipcReceiverAnalyzerChannel):
+        self.__receiverRepository.injectReceiverAnalyzerChannel(ipcReceiverAnalyzerChannel)
+
     def __blockToAcquireSocket(self):
         if self.__receiverRepository.getClientSocket() is None:
             return True
