@@ -70,7 +70,11 @@ class DomainInitializer:
 
     @staticmethod
     def initTransmitterDomain():
-        TransmitterServiceImpl.getInstance()
+        ipcQueueRepository = IPCQueueRepositoryImpl.getInstance()
+        ipcExecutorTransmitterChannel = ipcQueueRepository.getIPCExecutorTransmitterChannel()
+
+        transmitterService = TransmitterServiceImpl.getInstance()
+        transmitterService.requestToInjectExecutorTransmitterChannel(ipcExecutorTransmitterChannel)
 
     @staticmethod
     def initEachDomain():
