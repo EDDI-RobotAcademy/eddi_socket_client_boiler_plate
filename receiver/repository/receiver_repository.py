@@ -7,6 +7,10 @@ class ReceiverRepository(ABC):
         pass
 
     @abstractmethod
+    def injectReceiverAnalyzerChannel(self, ipcReceiverAnalyzerChannel):
+        pass
+
+    @abstractmethod
     def receive(self):
         pass
 

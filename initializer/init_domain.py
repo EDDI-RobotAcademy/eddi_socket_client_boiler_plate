@@ -4,11 +4,18 @@ from command_executor.service.command_executor_service_impl import CommandExecut
 from custom_protocol.entity.default_protocol import DefaultProtocolNumber
 from custom_protocol.service.custom_protocol_service_impl import CustomProtocolServiceImpl
 from dice.service.dice_service_impl import DiceServiceImpl
+from ipc_queue.repository.ipc_queue_repository_impl import IPCQueueRepositoryImpl
+from ipc_queue.service.ipc_queue_service_impl import IPCQueueServiceImpl
 from receiver.service.receiver_service_impl import ReceiverServiceImpl
 from transmitter.service.transmitter_service_impl import TransmitterServiceImpl
 
 
 class DomainInitializer:
+    @staticmethod
+    def initIPCQueueDomain():
+        ipcQueueService = IPCQueueServiceImpl.getInstance()
+        ipcQueueService.createEssentialIPCQueue()
+
     @staticmethod
     def initDiceDomain():
         DiceServiceImpl.getInstance()
@@ -35,15 +42,29 @@ class DomainInitializer:
 
     @staticmethod
     def initReceiverDomain():
-        ReceiverServiceImpl.getInstance()
+        ipcQueueRepository = IPCQueueRepositoryImpl.getInstance()
+        ipcReceiverAnalyzerChannel = ipcQueueRepository.getIPCReceiverAnalyzerChannel()
+
+        receiverService = ReceiverServiceImpl.getInstance()
+        receiverService.requestToInjectReceiverAnalyzerChannel(ipcReceiverAnalyzerChannel)
 
     @staticmethod
     def initCommandAnalyzerDomain():
-        CommandAnalyzerServiceImpl.getInstance()
+        ipcQueueRepository = IPCQueueRepositoryImpl.getInstance()
+        ipcReceiverAnalyzerChannel = ipcQueueRepository.getIPCReceiverAnalyzerChannel()
+        ipcAnalyzerExecutorChannel = ipcQueueRepository.getIPCAnalyzerExecutorChannel()
+
+        commandAnalyzerService = CommandAnalyzerServiceImpl.getInstance()
+        commandAnalyzerService.requestToInjectReceiverAnalyzerChannel(ipcReceiverAnalyzerChannel)
+        commandAnalyzerService.requestToInjectAnalyzerExecutorChannel(ipcAnalyzerExecutorChannel)
 
     @staticmethod
     def initCommandExecutorDomain():
-        CommandExecutorServiceImpl.getInstance()
+        ipcQueueRepository = IPCQueueRepositoryImpl.getInstance()
+        ipcAnalyzerExecutorChannel = ipcQueueRepository.getIPCAnalyzerExecutorChannel()
+
+        commandExecutorService = CommandExecutorServiceImpl.getInstance()
+        commandExecutorService.requestToInjectAnalyzerExecutorChannel(ipcAnalyzerExecutorChannel)
 
     @staticmethod
     def initTransmitterDomain():
@@ -53,6 +74,8 @@ class DomainInitializer:
     def initEachDomain():
         DomainInitializer.initDiceDomain()
         DomainInitializer.initCustomProtocolDomain()
+
+        DomainInitializer.initIPCQueueDomain()
 
         DomainInitializer.initClientSocketDomain()
 

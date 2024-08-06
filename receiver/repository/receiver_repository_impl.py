@@ -5,6 +5,7 @@ from utility.color_print import ColorPrinter
 class ReceiverRepositoryImpl(ReceiverRepository):
     __instance = None
     __clientSocket = None
+    __ipcReceiverAnalyzerChannel = None
 
     SOCKET_BUFFER_SIZE = 2048
 
@@ -26,6 +27,9 @@ class ReceiverRepositoryImpl(ReceiverRepository):
 
     def injectClientSocket(self, clientSocket):
         self.__clientSocket = clientSocket
+
+    def injectReceiverAnalyzerChannel(self, ipcReceiverAnalyzerChannel):
+        self.__ipcReceiverAnalyzerChannel = ipcReceiverAnalyzerChannel
 
     def receive(self):
         clientSocketObject = self.__clientSocket.getSocket()

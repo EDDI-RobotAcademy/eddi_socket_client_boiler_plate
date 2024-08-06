@@ -20,6 +20,12 @@ class CommandAnalyzerServiceImpl(CommandAnalyzerService):
 
         return cls.__instance
 
+    def requestToInjectReceiverAnalyzerChannel(self, ipcReceiverAnalyzerChannel):
+        self.__commandAnalyzerRepository.injectReceiverAnalyzerChannel(ipcReceiverAnalyzerChannel)
+
+    def requestToInjectAnalyzerExecutorChannel(self, ipcAnalyzerExecutorChannel):
+        self.__commandAnalyzerRepository.injectAnalyzerExecutorChannel(ipcAnalyzerExecutorChannel)
+
     def analysisCommand(self):
         ColorPrinter.print_important_message("Command Analyzer 구동")
     
