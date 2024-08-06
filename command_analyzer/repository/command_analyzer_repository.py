@@ -1,19 +1,15 @@
 from abc import ABC, abstractmethod
 
 
-class ReceiverRepository(ABC):
-    @abstractmethod
-    def injectClientSocket(self, clientSocket):
-        pass
-
+class CommandAnalyzerRepository(ABC):
     @abstractmethod
     def injectReceiverAnalyzerChannel(self, ipcReceiverAnalyzerChannel):
         pass
 
     @abstractmethod
-    def receive(self):
+    def injectAnalyzerExecutorChannel(self, ipcAnalyzerExecutorChannel):
         pass
 
     @abstractmethod
-    def closeConnection(self):
+    def analysis(self):
         pass
