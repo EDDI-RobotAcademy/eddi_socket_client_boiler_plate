@@ -27,6 +27,9 @@ class TransmitterServiceImpl(TransmitterService):
     def requestToInjectClientSocket(self, clientSocket):
         self.__transmitterRepository.injectClientSocket(clientSocket)
 
+    def requestToInjectExecutorTransmitterChannel(self, ipcExecutorTransmitterChannel):
+        self.__transmitterRepository.injectExecutorTransmitterChannel(ipcExecutorTransmitterChannel)
+
     def __blockToAcquireSocket(self):
         if self.__transmitterRepository.getClientSocket() is None:
             return True
