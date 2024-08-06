@@ -1,4 +1,6 @@
+from command_executor.repository.command_executor_repository_impl import CommandExecutorRepositoryImpl
 from command_executor.service.command_executor_service import CommandExecutorService
+from utility.color_print import ColorPrinter
 
 
 class CommandExecutorServiceImpl(CommandExecutorService):
@@ -19,5 +21,5 @@ class CommandExecutorServiceImpl(CommandExecutorService):
         return cls.__instance
 
     def execute_command(self):
-        pass
+        ColorPrinter.print_important_message("Command Executor 구동")
     

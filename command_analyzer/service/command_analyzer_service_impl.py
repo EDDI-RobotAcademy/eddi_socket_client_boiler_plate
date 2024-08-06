@@ -1,5 +1,6 @@
 from command_analyzer.repository.command_analyzer_repository_impl import CommandAnalyzerRepositoryImpl
 from command_analyzer.service.command_analyzer_service import CommandAnalyzerService
+from utility.color_print import ColorPrinter
 
 
 class CommandAnalyzerServiceImpl(CommandAnalyzerService):
@@ -20,5 +21,5 @@ class CommandAnalyzerServiceImpl(CommandAnalyzerService):
         return cls.__instance
 
     def analysisCommand(self):
-        pass
+        ColorPrinter.print_important_message("Command Analyzer 구동")
     
