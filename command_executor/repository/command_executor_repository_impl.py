@@ -3,6 +3,8 @@ from command_executor.repository.command_executor_repository import CommandExecu
 
 class CommandExecutorRepositoryImpl(CommandExecutorRepository):
     __instance = None
+    __ipcAnalyzerExecutorChannel = None
+    __ipcExecutorTransmitterChannel = None
 
     def __new__(cls):
         if cls.__instance is None:
@@ -16,6 +18,12 @@ class CommandExecutorRepositoryImpl(CommandExecutorRepository):
             cls.__instance = cls()
 
         return cls.__instance
+
+    def injectAnalyzerExecutorChannel(self, ipcAnalyzerExecutorChannel):
+        self.__ipcAnalyzerExecutorChannel = ipcAnalyzerExecutorChannel
+
+    def injectExecutorTransmitter(self, ipcExecutorTransmitterChannel):
+        self.__ipcExecutorTransmitterChannel = ipcExecutorTransmitterChannel
 
     def execute(self):
         pass

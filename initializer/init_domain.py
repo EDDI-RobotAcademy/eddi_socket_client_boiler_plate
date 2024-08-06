@@ -62,9 +62,11 @@ class DomainInitializer:
     def initCommandExecutorDomain():
         ipcQueueRepository = IPCQueueRepositoryImpl.getInstance()
         ipcAnalyzerExecutorChannel = ipcQueueRepository.getIPCAnalyzerExecutorChannel()
+        ipcExecutorTransmitterChannel = ipcQueueRepository.getIPCExecutorTransmitterChannel()
 
         commandExecutorService = CommandExecutorServiceImpl.getInstance()
         commandExecutorService.requestToInjectAnalyzerExecutorChannel(ipcAnalyzerExecutorChannel)
+        commandExecutorService.requestToInjectExecutorTransmitterChannel(ipcExecutorTransmitterChannel)
 
     @staticmethod
     def initTransmitterDomain():

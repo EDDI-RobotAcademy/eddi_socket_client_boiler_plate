@@ -20,6 +20,12 @@ class CommandExecutorServiceImpl(CommandExecutorService):
 
         return cls.__instance
 
+    def requestToInjectAnalyzerExecutorChannel(self, ipcAnalyzerExecutorChannel):
+        self.__commandExecutorRepository.injectAnalyzerExecutorChannel(ipcAnalyzerExecutorChannel)
+
+    def requestToInjectExecutorTransmitterChannel(self, ipcExecutorTransmitterChannel):
+        self.__commandExecutorRepository.injectExecutorTransmitter(ipcExecutorTransmitterChannel)
+
     def execute_command(self):
         ColorPrinter.print_important_message("Command Executor 구동")
     
