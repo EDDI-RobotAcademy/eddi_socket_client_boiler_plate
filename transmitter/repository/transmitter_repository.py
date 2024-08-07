@@ -7,6 +7,10 @@ class TransmitterRepository(ABC):
         pass
 
     @abstractmethod
+    def injectExecutorTransmitterChannel(self, ipcExecutorTransmitterChannel):
+        pass
+
+    @abstractmethod
     def requestToTransmitResult(self):
         pass
 
