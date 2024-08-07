@@ -27,6 +27,9 @@ class CommandAnalyzerRepositoryImpl(CommandAnalyzerRepository):
     def injectAnalyzerExecutorChannel(self, ipcAnalyzerExecutorChannel):
         self.__ipcAnalyzerExecutorChannel = ipcAnalyzerExecutorChannel
 
-    def analysis(self):
-        pass
-    
+    def acquireNeedToAnalysisRequestedData(self):
+        return self.__ipcReceiverAnalyzerChannel.get()
+
+    def sendDataToCommandExecutor(self, willBeExecuteData):
+        return self.__ipcAnalyzerExecutorChannel.put(willBeExecuteData)
+

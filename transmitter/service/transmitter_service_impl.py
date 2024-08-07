@@ -2,6 +2,8 @@ import json
 import socket
 from time import sleep
 
+from custom_protocol.entity.custom_protocol import CustomProtocolNumber
+from response_generator.generator import ResponseGenerator
 from transmitter.repository.transmitter_repository_impl import TransmitterRepositoryImpl
 from transmitter.service.transmitter_service import TransmitterService
 from utility.color_print import ColorPrinter
@@ -27,6 +29,9 @@ class TransmitterServiceImpl(TransmitterService):
     def requestToInjectClientSocket(self, clientSocket):
         self.__transmitterRepository.injectClientSocket(clientSocket)
 
+    def requestToInjectExecutorTransmitterChannel(self, ipcExecutorTransmitterChannel):
+        self.__transmitterRepository.injectExecutorTransmitterChannel(ipcExecutorTransmitterChannel)
+
     def __blockToAcquireSocket(self):
         if self.__transmitterRepository.getClientSocket() is None:
             return True
@@ -37,15 +42,25 @@ class TransmitterServiceImpl(TransmitterService):
         while self.__blockToAcquireSocket():
             sleep(0.5)
 
-        ColorPrinter.print_important_message("Transmitter 생성 성공!")
+        ColorPrinter.print_important_message("Transmitter 구동 성공!")
 
         while True:
             try:
-                transmitData = "test"
-                serializedData = json.dumps({"message": transmitData})
+                willBeTransmitResponse = self.__transmitterRepository.acquireWillBeTransmit()
+                ColorPrinter.print_important_data("Transmitter -> 전송할 데이터", willBeTransmitResponse)
+
+                # transmitData = "test"
+                # serializedData = json.dumps({"message": transmitData})
 
                 # clientSocketObject.sendall(serializedData.encode())
-                self.__transmitterRepository.transmit(serializedData)
+                # TODO: Response Generator 만들어야함
+                protocolNumber, response = willBeTransmitResponse
+                rollDiceResponse = ResponseGenerator.generate(protocolNumber, response)
+                dictionarizedResponse = rollDiceResponse.toDictionary()
+
+                serializedRequestData = json.dumps(dictionarizedResponse, ensure_ascii=False)
+
+                self.__transmitterRepository.transmit(serializedRequestData)
 
             except (socket.error, BrokenPipeError) as exception:
                 return None

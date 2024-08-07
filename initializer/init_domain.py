@@ -1,7 +1,7 @@
 from client_socket.service.client_socket_service_impl import ClientSocketServiceImpl
 from command_analyzer.service.command_analyzer_service_impl import CommandAnalyzerServiceImpl
 from command_executor.service.command_executor_service_impl import CommandExecutorServiceImpl
-from custom_protocol.entity.default_protocol import DefaultProtocolNumber
+from custom_protocol.entity.custom_protocol import CustomProtocolNumber
 from custom_protocol.service.custom_protocol_service_impl import CustomProtocolServiceImpl
 from dice.service.dice_service_impl import DiceServiceImpl
 from ipc_queue.repository.ipc_queue_repository_impl import IPCQueueRepositoryImpl
@@ -27,12 +27,12 @@ class DomainInitializer:
 
         # 디폴트 프로토콜 등록을 여기서 했음
         customProtocolService.registerCustomProtocol(
-            DefaultProtocolNumber.DICE_ROLL_JUST_FOR_TEST,
+            CustomProtocolNumber.ROLL_DICE,
             diceService.rollDice
         )
 
         customProtocolService.registerCustomProtocol(
-            DefaultProtocolNumber.DICE_LIST_JUST_FOR_TEST,
+            CustomProtocolNumber.LIST_DICE,
             diceService.diceList
         )
 
@@ -70,7 +70,11 @@ class DomainInitializer:
 
     @staticmethod
     def initTransmitterDomain():
-        TransmitterServiceImpl.getInstance()
+        ipcQueueRepository = IPCQueueRepositoryImpl.getInstance()
+        ipcExecutorTransmitterChannel = ipcQueueRepository.getIPCExecutorTransmitterChannel()
+
+        transmitterService = TransmitterServiceImpl.getInstance()
+        transmitterService.requestToInjectExecutorTransmitterChannel(ipcExecutorTransmitterChannel)
 
     @staticmethod
     def initEachDomain():
