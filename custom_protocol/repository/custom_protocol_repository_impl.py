@@ -1,10 +1,5 @@
-from custom_protocol.entity.default_protocol import DefaultProtocolNumber
+from custom_protocol.entity.custom_protocol import CustomProtocolNumber
 from custom_protocol.repository.custom_protocol_repository import CustomProtocolRepository
-
-try:
-    from user_defined_protocol.entity.custom_protocol import CustomProtocolNumber
-except ImportError:
-    CustomProtocolNumber = None
 
 
 class CustomProtocolRepositoryImpl(CustomProtocolRepository):
@@ -25,9 +20,12 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
         return cls.__instance
 
     def register(self, protocolNumber, customFunction):
-        if not isinstance(protocolNumber, DefaultProtocolNumber) and \
-                (CustomProtocolNumber is None or not isinstance(protocolNumber, CustomProtocolNumber)):
-            raise ValueError("프로토콜을 등록 할 시 반드시 FastAPI 쪽 user_defined_protocol에 정의하세요")
+        print(f"Registering protocolNumber: {protocolNumber}, customFunction: {customFunction}")
+
+        if protocolNumber is None:
+            raise ValueError("프로토콜 번호가 None입니다.")
+        if not CustomProtocolNumber.hasValue(protocolNumber.value):
+            raise ValueError("프로토콜을 등록 시 반드시 CustomProtocolNumber에 정의된 값을 사용하세요")
         if not callable(customFunction):
             raise  ValueError("customFunction은 프로토콜에 대응하는 함수입니다")
 

@@ -1,3 +1,5 @@
+from time import sleep
+
 from command_analyzer.repository.command_analyzer_repository_impl import CommandAnalyzerRepositoryImpl
 from command_analyzer.service.command_analyzer_service import CommandAnalyzerService
 from utility.color_print import ColorPrinter
@@ -28,4 +30,10 @@ class CommandAnalyzerServiceImpl(CommandAnalyzerService):
 
     def analysisCommand(self):
         ColorPrinter.print_important_message("Command Analyzer 구동")
+
+        while True:
+            needToAnalysisRequestedData = self.__commandAnalyzerRepository.acquireNeedToAnalysisRequestedData()
+            ColorPrinter.print_important_data("Command Analyzer -> 분석할 데이터", needToAnalysisRequestedData)
+
+            sleep(1)
     

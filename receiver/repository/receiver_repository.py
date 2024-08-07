@@ -11,6 +11,10 @@ class ReceiverRepository(ABC):
         pass
 
     @abstractmethod
+    def sendDataToCommandAnalyzer(self, decodedData):
+        pass
+
+    @abstractmethod
     def receive(self):
         pass
 

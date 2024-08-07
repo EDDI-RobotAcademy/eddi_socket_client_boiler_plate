@@ -31,6 +31,9 @@ class ReceiverRepositoryImpl(ReceiverRepository):
     def injectReceiverAnalyzerChannel(self, ipcReceiverAnalyzerChannel):
         self.__ipcReceiverAnalyzerChannel = ipcReceiverAnalyzerChannel
 
+    def sendDataToCommandAnalyzer(self, decodedData):
+        self.__ipcReceiverAnalyzerChannel.put(decodedData)
+
     def receive(self):
         clientSocketObject = self.__clientSocket.getSocket()
         receivedData = clientSocketObject.recv(self.SOCKET_BUFFER_SIZE)
