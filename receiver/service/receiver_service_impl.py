@@ -42,7 +42,7 @@ class ReceiverServiceImpl(ReceiverService):
         while self.__blockToAcquireSocket():
             sleep(0.5)
 
-        ColorPrinter.print_important_message("Receiver 생성 성공!")
+        ColorPrinter.print_important_message("Receiver 구동 성공!")
 
         while True:
             try:

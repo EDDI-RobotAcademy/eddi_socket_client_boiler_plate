@@ -10,5 +10,8 @@ class Dice:
     def __init__(self):
         self.__number = random.randint(self.MIN, self.MAX)
 
+    def getNumber(self):
+        return self.__number
+
     def __str__(self):
-        return f"dice number: {self.__number}"
+        return f"number: {self.__number}"
