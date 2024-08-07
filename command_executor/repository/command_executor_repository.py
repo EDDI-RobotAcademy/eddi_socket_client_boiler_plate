@@ -11,5 +11,13 @@ class CommandExecutorRepository(ABC):
         pass
 
     @abstractmethod
+    def acquireWillBeExecuteData(self):
+        pass
+
+    @abstractmethod
+    def sendResponseToTransmitter(self, response):
+        pass
+
+    @abstractmethod
     def execute(self):
         pass

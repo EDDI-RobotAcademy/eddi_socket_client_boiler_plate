@@ -11,7 +11,7 @@ class TransmitterRepository(ABC):
         pass
 
     @abstractmethod
-    def requestToTransmitResult(self):
+    def acquireWillBeTransmit(self):
         pass
 
     @abstractmethod

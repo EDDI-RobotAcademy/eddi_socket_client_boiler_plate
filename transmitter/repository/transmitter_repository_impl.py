@@ -30,8 +30,8 @@ class TransmitterRepositoryImpl(TransmitterRepository):
     def getClientSocket(self):
         return self.__clientSocket
 
-    def requestToTransmitResult(self):
-        pass
+    def acquireWillBeTransmit(self):
+        return self.__ipcExecutorTransmitterChannel.get()
 
     def transmit(self, serializedTransmitData):
         clientSocketObject = self.__clientSocket.getSocket()
