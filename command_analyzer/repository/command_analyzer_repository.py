@@ -15,5 +15,5 @@ class CommandAnalyzerRepository(ABC):
         pass
 
     @abstractmethod
-    def analysis(self):
+    def sendDataToCommandExecutor(self, willBeExecuteData):
         pass

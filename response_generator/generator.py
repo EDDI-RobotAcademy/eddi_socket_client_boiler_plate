@@ -1,16 +1,16 @@
-import json
-
-from response_generator.response_type import ResponseType
+from custom_protocol.entity.custom_protocol import CustomProtocolNumber
+from response_generator.response_class_map import ResponseClassMap
 
 
 class ResponseGenerator:
     @staticmethod
-    def generator(decodedData):
-        data_dict = json.loads(decodedData)
-
-        for response_type in ResponseType:
-            if response_type.name in data_dict:
-                response_data = data_dict[response_type.name]
-                return response_data
+    def generate(protocol, data=None):
+        protocolEnum = CustomProtocolNumber(protocol)
+        responseClass = ResponseClassMap.getResponseClass(protocolEnum.name)
+        if responseClass:
+            if data:
+                return responseClass(**data)
+            else:
+                return responseClass()
 
         raise ValueError("서포트하지 않는 Response Type 입니다")

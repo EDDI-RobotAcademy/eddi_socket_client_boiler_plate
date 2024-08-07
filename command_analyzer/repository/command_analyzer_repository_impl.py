@@ -30,6 +30,6 @@ class CommandAnalyzerRepositoryImpl(CommandAnalyzerRepository):
     def acquireNeedToAnalysisRequestedData(self):
         return self.__ipcReceiverAnalyzerChannel.get()
 
-    def analysis(self):
-        pass
-    
+    def sendDataToCommandExecutor(self, willBeExecuteData):
+        return self.__ipcAnalyzerExecutorChannel.put(willBeExecuteData)
+

@@ -31,10 +31,10 @@ if __name__ == "__main__":
     taskWorkerService.createTaskWorker("Receiver", receiverService.requestToReceiveCommand)
     taskWorkerService.executeTaskWorker("Receiver")
 
-    taskWorkerService.createTaskWorker("CommandAnalyzer", commandAnalyzerService.analysisCommand())
+    taskWorkerService.createTaskWorker("CommandAnalyzer", commandAnalyzerService.analysisCommand)
     taskWorkerService.executeTaskWorker("CommandAnalyzer")
 
-    taskWorkerService.createTaskWorker("CommandExecutor", commandExecutorService.execute_command())
+    taskWorkerService.createTaskWorker("CommandExecutor", commandExecutorService.executeCommand)
     taskWorkerService.executeTaskWorker("CommandExecutor")
 
     taskWorkerService.createTaskWorker("Transmitter", transmitterService.requestToTransmitResult)

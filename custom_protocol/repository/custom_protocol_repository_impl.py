@@ -30,4 +30,14 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
             raise  ValueError("customFunction은 프로토콜에 대응하는 함수입니다")
 
         self.__protocolTable[protocolNumber.value] = customFunction
+
+    def execute(self, requestObject):
+        # print(f"CommandExecutor requestObject -> protocolNumber: {requestObject.getProtocolNumber()}, "
+        #       f"customFunction: {self.__protocolTable[requestObject.getProtocolNumber()]}")
+
+        userDefinedFunction = self.__protocolTable[requestObject.getProtocolNumber()]
+        
+        # TODO: 아직 파라미터 없는 함수만 처리되는 상황임
+        result = userDefinedFunction()
+        return result
     

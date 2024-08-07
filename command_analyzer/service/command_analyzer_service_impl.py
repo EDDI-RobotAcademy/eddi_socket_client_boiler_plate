@@ -2,6 +2,7 @@ from time import sleep
 
 from command_analyzer.repository.command_analyzer_repository_impl import CommandAnalyzerRepositoryImpl
 from command_analyzer.service.command_analyzer_service import CommandAnalyzerService
+from protocol_validation.validator import ProtocolValidator
 from utility.color_print import ColorPrinter
 
 
@@ -29,11 +30,14 @@ class CommandAnalyzerServiceImpl(CommandAnalyzerService):
         self.__commandAnalyzerRepository.injectAnalyzerExecutorChannel(ipcAnalyzerExecutorChannel)
 
     def analysisCommand(self):
-        ColorPrinter.print_important_message("Command Analyzer 구동")
+        ColorPrinter.print_important_message("Command Analyzer 구동 성공!")
 
         while True:
             needToAnalysisRequestedData = self.__commandAnalyzerRepository.acquireNeedToAnalysisRequestedData()
             ColorPrinter.print_important_data("Command Analyzer -> 분석할 데이터", needToAnalysisRequestedData)
+
+            if ProtocolValidator.validate(needToAnalysisRequestedData):
+                self.__commandAnalyzerRepository.sendDataToCommandExecutor(needToAnalysisRequestedData)
 
             sleep(1)
     
