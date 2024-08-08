@@ -9,18 +9,10 @@ class ResponseGenerator:
     def generate(protocol, response=None):
         protocolEnum = CustomProtocolNumber(protocol)
         responseClass = ResponseClassMap.getResponseClass(protocolEnum.name)
-        # TODO: 다른 상황에서도 사용할 수 있도록 일반화 시켜야함
-        # if responseClass:
-        #     if response:
-        #         socketResponse = ResponseConverter.convert(response, responseClass)
-        #         ColorPrinter.print_important_data("socketResponse", socketResponse)
-        #         return socketResponse
-        #     else:
-        #         return responseClass()
 
-        if responseClass:
-            socketResponse = ResponseConverter.convert(response, responseClass)
-            ColorPrinter.print_important_data("socketResponse", socketResponse)
-            return socketResponse
+        if response is None:
+            return None
 
-        raise ValueError("서포트하지 않는 Response Type 입니다")
+        socketResponse = ResponseConverter.convert(response, responseClass)
+        ColorPrinter.print_important_data("socketResponse", socketResponse)
+        return socketResponse
