@@ -1,4 +1,5 @@
 from custom_protocol.entity.custom_protocol import CustomProtocolNumber
+from response_generator.dice.list_dice_response import ListDiceResponse
 from response_generator.response_class_map import ResponseClassMap
 
 
@@ -9,7 +10,8 @@ class ResponseGenerator:
         responseClass = ResponseClassMap.getResponseClass(protocolEnum.name)
         if responseClass:
             if data:
-                return responseClass(**data)
+                diceNumberList = data.getDiceNumberList()
+                return responseClass(diceNumberList)
             else:
                 return responseClass()
 

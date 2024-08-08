@@ -3,6 +3,9 @@ class ListDiceResponse:
         self.protocolNumber = protocolNumber
         self.diceList = diceList
 
+    def getDiceNumberList(self):
+        return [dice.getNumber() for dice in self.diceList]
+
     def toDictionary(self):
         return {
             "protocolNumber": self.protocolNumber,
