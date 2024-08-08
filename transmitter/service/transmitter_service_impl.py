@@ -49,11 +49,6 @@ class TransmitterServiceImpl(TransmitterService):
                 willBeTransmitResponse = self.__transmitterRepository.acquireWillBeTransmit()
                 ColorPrinter.print_important_data("Transmitter -> 전송할 데이터", willBeTransmitResponse)
 
-                # transmitData = "test"
-                # serializedData = json.dumps({"message": transmitData})
-
-                # clientSocketObject.sendall(serializedData.encode())
-                # TODO: Response Generator 만들어야함
                 protocolNumber, response = willBeTransmitResponse
                 socketResponse = ResponseGenerator.generate(protocolNumber, response)
 
