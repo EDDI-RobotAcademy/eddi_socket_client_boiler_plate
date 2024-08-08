@@ -1,5 +1,7 @@
+from custom_protocol.entity.custom_protocol import CustomProtocolNumber
 from dice.repository.dice_repository_impl import DiceRepositoryImpl
 from dice.service.dice_service import DiceService
+from dice.service.response.list_dice_response import ListDiceResponse
 
 
 class DiceServiceImpl(DiceService):
@@ -23,4 +25,6 @@ class DiceServiceImpl(DiceService):
         self.__diceRepository.roll()
 
     def diceList(self):
-        self.__diceRepository.list()
+        diceList = self.__diceRepository.list()
+        return ListDiceResponse(CustomProtocolNumber.LIST_DICE, diceList)
+
