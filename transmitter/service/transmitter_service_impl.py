@@ -55,8 +55,8 @@ class TransmitterServiceImpl(TransmitterService):
                 # clientSocketObject.sendall(serializedData.encode())
                 # TODO: Response Generator 만들어야함
                 protocolNumber, response = willBeTransmitResponse
-                rollDiceResponse = ResponseGenerator.generate(protocolNumber, response)
-                dictionarizedResponse = rollDiceResponse.toDictionary()
+                socketResponse = ResponseGenerator.generate(protocolNumber, response)
+                dictionarizedResponse = socketResponse.toDictionary()
 
                 serializedRequestData = json.dumps(dictionarizedResponse, ensure_ascii=False)
 

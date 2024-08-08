@@ -6,6 +6,9 @@ class ListDiceRequest(BaseResponse):
     def __init__(self):
         self.__protocolNumber = RequestType.LIST_DICE.value
 
+    def getProtocolNumber(self):
+        return self.__protocolNumber
+
     def toDictionary(self):
         return {
             "protocolNumber": self.__protocolNumber
@@ -13,4 +16,3 @@ class ListDiceRequest(BaseResponse):
 
     def __str__(self):
         return f"ListDiceRequest(protocolNumber={self.__protocolNumber})"
-    
