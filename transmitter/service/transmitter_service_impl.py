@@ -56,8 +56,11 @@ class TransmitterServiceImpl(TransmitterService):
                 # TODO: Response Generator 만들어야함
                 protocolNumber, response = willBeTransmitResponse
                 socketResponse = ResponseGenerator.generate(protocolNumber, response)
-                dictionarizedResponse = socketResponse.toDictionary()
 
+                if socketResponse is None:
+                    continue
+
+                dictionarizedResponse = socketResponse.toDictionary()
                 serializedRequestData = json.dumps(dictionarizedResponse, ensure_ascii=False)
 
                 self.__transmitterRepository.transmit(serializedRequestData)

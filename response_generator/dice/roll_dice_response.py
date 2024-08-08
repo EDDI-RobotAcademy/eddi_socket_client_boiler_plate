@@ -8,7 +8,7 @@ class RollDiceResponse(BaseResponse):
 
     @classmethod
     def fromResponse(cls, response):
-        return cls()
+        return None
 
     def toDictionary(self):
         return {"protocolNumber": self.protocolNumber}
