@@ -27,4 +27,4 @@ class DiceRepositoryImpl(DiceRepository):
         for dice in self.__diceList:
             print(f"dice: {dice}")
 
-
+        return self.__diceList
