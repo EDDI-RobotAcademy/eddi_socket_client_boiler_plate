@@ -8,6 +8,7 @@ from os_detector.detect import OperatingSystemDetector
 from os_detector.operating_system import OperatingSystem
 from receiver.service.receiver_service_impl import ReceiverServiceImpl
 from task_worker.service.task_worker_service_impl import TaskWorkerServiceImpl
+from thread_worker.service.thread_worker_service_impl import ThreadWorkerServiceImpl
 from transmitter.service.transmitter_service_impl import TransmitterServiceImpl
 from utility.color_print import ColorPrinter
 
@@ -36,15 +37,30 @@ if __name__ == "__main__":
     commandAnalyzerService = CommandAnalyzerServiceImpl.getInstance()
     commandExecutorService = CommandExecutorServiceImpl.getInstance()
 
-    taskWorkerService = TaskWorkerServiceImpl.getInstance()
-    taskWorkerService.createTaskWorker("Receiver", receiverService.requestToReceiveCommand)
-    taskWorkerService.executeTaskWorker("Receiver")
+    # TODO: 약간 지저분 해져서 이부분 관리 할 로직 작성이 필요해보임
+    if detectedOperatingSystem is OperatingSystem.MACOS:
+        threadWorkerService = ThreadWorkerServiceImpl.getInstance()
+        threadWorkerService.createThreadWorker("Receiver", receiverService.requestToReceiveCommand)
+        threadWorkerService.executeThreadWorker("Receiver")
 
-    taskWorkerService.createTaskWorker("CommandAnalyzer", commandAnalyzerService.analysisCommand)
-    taskWorkerService.executeTaskWorker("CommandAnalyzer")
+        threadWorkerService.createTaskWorker("CommandAnalyzer", commandAnalyzerService.analysisCommand)
+        threadWorkerService.executeTaskWorker("CommandAnalyzer")
 
-    taskWorkerService.createTaskWorker("CommandExecutor", commandExecutorService.executeCommand)
-    taskWorkerService.executeTaskWorker("CommandExecutor")
+        threadWorkerService.createTaskWorker("CommandExecutor", commandExecutorService.executeCommand)
+        threadWorkerService.executeTaskWorker("CommandExecutor")
 
-    taskWorkerService.createTaskWorker("Transmitter", transmitterService.requestToTransmitResult)
-    taskWorkerService.executeTaskWorker("Transmitter")
+        threadWorkerService.createTaskWorker("Transmitter", transmitterService.requestToTransmitResult)
+        threadWorkerService.executeTaskWorker("Transmitter")
+    else:
+        taskWorkerService = TaskWorkerServiceImpl.getInstance()
+        taskWorkerService.createTaskWorker("Receiver", receiverService.requestToReceiveCommand)
+        taskWorkerService.executeTaskWorker("Receiver")
+
+        taskWorkerService.createTaskWorker("CommandAnalyzer", commandAnalyzerService.analysisCommand)
+        taskWorkerService.executeTaskWorker("CommandAnalyzer")
+
+        taskWorkerService.createTaskWorker("CommandExecutor", commandExecutorService.executeCommand)
+        taskWorkerService.executeTaskWorker("CommandExecutor")
+
+        taskWorkerService.createTaskWorker("Transmitter", transmitterService.requestToTransmitResult)
+        taskWorkerService.executeTaskWorker("Transmitter")
