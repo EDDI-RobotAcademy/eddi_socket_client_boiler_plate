@@ -7,10 +7,20 @@ from dice.service.dice_service_impl import DiceServiceImpl
 from ipc_queue.repository.ipc_queue_repository_impl import IPCQueueRepositoryImpl
 from ipc_queue.service.ipc_queue_service_impl import IPCQueueServiceImpl
 from receiver.service.receiver_service_impl import ReceiverServiceImpl
+from task_worker.service.task_worker_service_impl import TaskWorkerServiceImpl
+from thread_worker.service.thread_worker_service_impl import ThreadWorkerServiceImpl
 from transmitter.service.transmitter_service_impl import TransmitterServiceImpl
 
 
 class DomainInitializer:
+    @staticmethod
+    def initThreadWorkerDomain():
+        ThreadWorkerServiceImpl.getInstance()
+
+    @staticmethod
+    def initTaskWorkerDomain():
+        TaskWorkerServiceImpl.getInstance()
+
     @staticmethod
     def initIPCQueueDomain():
         ipcQueueService = IPCQueueServiceImpl.getInstance()
@@ -80,6 +90,9 @@ class DomainInitializer:
     def initEachDomain():
         DomainInitializer.initDiceDomain()
         DomainInitializer.initCustomProtocolDomain()
+
+        DomainInitializer.initThreadWorkerDomain()
+        DomainInitializer.initTaskWorkerDomain()
 
         DomainInitializer.initIPCQueueDomain()
 
