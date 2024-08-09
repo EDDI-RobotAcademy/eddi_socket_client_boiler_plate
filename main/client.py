@@ -43,14 +43,14 @@ if __name__ == "__main__":
         threadWorkerService.createThreadWorker("Receiver", receiverService.requestToReceiveCommand)
         threadWorkerService.executeThreadWorker("Receiver")
 
-        threadWorkerService.createTaskWorker("CommandAnalyzer", commandAnalyzerService.analysisCommand)
-        threadWorkerService.executeTaskWorker("CommandAnalyzer")
+        threadWorkerService.createThreadWorker("CommandAnalyzer", commandAnalyzerService.analysisCommand)
+        threadWorkerService.executeThreadWorker("CommandAnalyzer")
 
-        threadWorkerService.createTaskWorker("CommandExecutor", commandExecutorService.executeCommand)
-        threadWorkerService.executeTaskWorker("CommandExecutor")
+        threadWorkerService.createThreadWorker("CommandExecutor", commandExecutorService.executeCommand)
+        threadWorkerService.executeThreadWorker("CommandExecutor")
 
-        threadWorkerService.createTaskWorker("Transmitter", transmitterService.requestToTransmitResult)
-        threadWorkerService.executeTaskWorker("Transmitter")
+        threadWorkerService.createThreadWorker("Transmitter", transmitterService.requestToTransmitResult)
+        threadWorkerService.executeThreadWorker("Transmitter")
     else:
         taskWorkerService = TaskWorkerServiceImpl.getInstance()
         taskWorkerService.createTaskWorker("Receiver", receiverService.requestToReceiveCommand)
