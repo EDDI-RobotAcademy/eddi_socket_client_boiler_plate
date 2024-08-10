@@ -49,15 +49,13 @@ class TransmitterServiceImpl(TransmitterService):
                 willBeTransmitResponse = self.__transmitterRepository.acquireWillBeTransmit()
                 ColorPrinter.print_important_data("Transmitter -> 전송할 데이터", willBeTransmitResponse)
 
-                # transmitData = "test"
-                # serializedData = json.dumps({"message": transmitData})
-
-                # clientSocketObject.sendall(serializedData.encode())
-                # TODO: Response Generator 만들어야함
                 protocolNumber, response = willBeTransmitResponse
-                rollDiceResponse = ResponseGenerator.generate(protocolNumber, response)
-                dictionarizedResponse = rollDiceResponse.toDictionary()
+                socketResponse = ResponseGenerator.generate(protocolNumber, response)
 
+                if socketResponse is None:
+                    continue
+
+                dictionarizedResponse = socketResponse.toDictionary()
                 serializedRequestData = json.dumps(dictionarizedResponse, ensure_ascii=False)
 
                 self.__transmitterRepository.transmit(serializedRequestData)

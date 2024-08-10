@@ -7,10 +7,15 @@ class ListDiceResponse(BaseResponse):
         self.protocolNumber = ResponseType.LIST_DICE.value
         self.diceList = diceList
 
+    @classmethod
+    def fromResponse(cls, response):
+        diceList = response.getDiceNumberList()
+        return cls(diceList)
+
     def toDictionary(self):
         return {
             "protocolNumber": self.protocolNumber,
-            "diceList": [str(dice) for dice in self.diceList]
+            "diceList": [dice for dice in self.diceList]
         }
 
     def __str__(self):

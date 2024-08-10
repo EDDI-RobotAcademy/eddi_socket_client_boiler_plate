@@ -1,5 +1,6 @@
 from custom_protocol.entity.custom_protocol import CustomProtocolNumber
 from custom_protocol.repository.custom_protocol_repository import CustomProtocolRepository
+from utility.color_print import ColorPrinter
 
 
 class CustomProtocolRepositoryImpl(CustomProtocolRepository):
@@ -39,5 +40,7 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
         
         # TODO: 아직 파라미터 없는 함수만 처리되는 상황임
         result = userDefinedFunction()
+        ColorPrinter.print_important_data("result", result)
+
         return result
     
