@@ -6,6 +6,10 @@ class RollDiceResponse(BaseResponse):
     def __init__(self):
         self.protocolNumber = ResponseType.ROLL_DICE.value
 
+    @classmethod
+    def fromResponse(cls, response):
+        return None
+
     def toDictionary(self):
         return {"protocolNumber": self.protocolNumber}
 

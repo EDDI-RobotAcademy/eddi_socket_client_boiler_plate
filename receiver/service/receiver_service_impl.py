@@ -52,14 +52,19 @@ class ReceiverServiceImpl(ReceiverService):
                     self.__receiverRepository.closeConnection()
                     break
 
-                # decodedData = receivedData.decode()
-                # ColorPrinter.print_important_data("수신된 정보", decodedData)
-                #
-                # requestData = RequestGenerator.generate(decodedData)
+                try:
+                    dictionaryData = json.loads(receivedData)
+                    ColorPrinter.print_important_data("dictionaryData", dictionaryData)
 
-                dictionaryData = json.loads(receivedData)
-                protocolNumber = dictionaryData.get("protocolNumber")
+                except json.JSONDecodeError as e:
+                    ColorPrinter.print_important_data("JSON Decode Error", str(e))
+                    continue
+
+                protocolNumber = dictionaryData.get("command")
+                ColorPrinter.print_important_data("protocolNumber", protocolNumber)
+
                 data = dictionaryData.get("data", {})
+                ColorPrinter.print_important_data("data", data)
 
                 if protocolNumber is not None:
                     ColorPrinter.print_important_data("received protocol",
@@ -93,4 +98,3 @@ class ReceiverServiceImpl(ReceiverService):
 
             finally:
                 sleep(0.5)
-
