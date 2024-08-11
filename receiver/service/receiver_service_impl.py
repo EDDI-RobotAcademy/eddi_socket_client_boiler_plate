@@ -40,6 +40,7 @@ class ReceiverServiceImpl(ReceiverService):
 
     def requestToReceiveCommand(self):
         while self.__blockToAcquireSocket():
+            ColorPrinter.print_important_message("Receiver: Try to get SSL Socket")
             sleep(0.5)
 
         ColorPrinter.print_important_message("Receiver 구동 성공!")
@@ -80,11 +81,6 @@ class ReceiverServiceImpl(ReceiverService):
             except BlockingIOError:
                 pass
 
-            except (socket.error, BrokenPipeError) as exception:
-                ColorPrinter.print_important_message("Broken Pipe")
-                self.__receiverRepository.closeConnection()
-                break
-
             except socket.error as socketException:
                 if socketException.errno == socket.errno.EAGAIN == socket.errno.EWOULDBLOCK:
                     ColorPrinter.print_important_message("문제 없음")
@@ -92,6 +88,11 @@ class ReceiverServiceImpl(ReceiverService):
 
                 else:
                     ColorPrinter.print_important_message("수신 중 에러")
+
+            except (socket.error, BrokenPipeError) as exception:
+                ColorPrinter.print_important_message("Broken Pipe")
+                self.__receiverRepository.closeConnection()
+                break
 
             except Exception as exception:
                 ColorPrinter.print_important_data("Receiver 정보", str(exception))

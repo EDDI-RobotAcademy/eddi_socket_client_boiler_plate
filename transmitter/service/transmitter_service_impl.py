@@ -40,6 +40,7 @@ class TransmitterServiceImpl(TransmitterService):
 
     def requestToTransmitResult(self):
         while self.__blockToAcquireSocket():
+            ColorPrinter.print_important_message("Transmitter: Try to get SSL Socket")
             sleep(0.5)
 
         ColorPrinter.print_important_message("Transmitter 구동 성공!")
