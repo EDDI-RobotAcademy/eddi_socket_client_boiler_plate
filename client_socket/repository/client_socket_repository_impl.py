@@ -8,7 +8,7 @@ from decouple import config
 from client_socket.entity.client_socket import ClientSocket
 from client_socket.repository.client_socket_repository import ClientSocketRepository
 from critical_section.manager import CriticalSectionManager
-from ssl_tls.ssl_tls_context_manager import SslTlsClientContextManager
+from ssl_tls.ssl_tls_context_manager import SslTlsContextManager
 
 
 class ClientSocketRepositoryImpl(ClientSocketRepository):
@@ -29,8 +29,8 @@ class ClientSocketRepositoryImpl(ClientSocketRepository):
         return cls.__instance
 
     def create(self):
-        SslTlsClientContextManager.initSslTlsContext()
-        sslContext = SslTlsClientContextManager.getSSLContext()
+        SslTlsContextManager.initSslTlsContext()
+        sslContext = SslTlsContextManager.getSSLContext()
 
         clientSocketObject = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.__setNonBlocking(clientSocketObject)

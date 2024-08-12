@@ -7,7 +7,7 @@ from initializer.init_domain import DomainInitializer
 from os_detector.detect import OperatingSystemDetector
 from os_detector.operating_system import OperatingSystem
 from receiver.service.receiver_service_impl import ReceiverServiceImpl
-from ssl_tls.ssl_tls_context_manager import SslTlsClientContextManager
+from ssl_tls.ssl_tls_context_manager import SslTlsContextManager
 from task_worker.service.task_worker_service_impl import TaskWorkerServiceImpl
 from thread_worker.service.thread_worker_service_impl import ThreadWorkerServiceImpl
 from transmitter.service.transmitter_service_impl import TransmitterServiceImpl
