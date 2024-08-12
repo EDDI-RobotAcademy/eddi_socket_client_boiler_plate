@@ -7,5 +7,5 @@ class ClientSocketRepository(ABC):
         pass
 
     @abstractmethod
-    def connectToTargetHostUnitlSuccess(self):
+    def connectToTargetHostUnitSuccess(self):
         pass

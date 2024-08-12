@@ -23,8 +23,8 @@ class ClientSocketServiceImpl(ClientSocketService):
     def createClientSocket(self):
         return self.__clientSocketRepository.create()
 
-    def connectToTargetHostUnitlSuccess(self):
-        self.__clientSocketRepository.connectToTargetHostUnitlSuccess()
+    def connectToTargetHostUnitSuccess(self):
+        self.__clientSocketRepository.connectToTargetHostUnitSuccess()
 
         ColorPrinter.print_important_message("서버에 접속 성공!")
 
