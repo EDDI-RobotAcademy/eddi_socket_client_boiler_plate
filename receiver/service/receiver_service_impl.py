@@ -1,7 +1,12 @@
 import json
 import socket
+import ssl
+import threading
 from time import sleep
 
+import select
+
+from critical_section.manager import CriticalSectionManager
 from custom_protocol.entity.custom_protocol import CustomProtocolNumber
 from receiver.repository.receiver_repository_impl import ReceiverRepositoryImpl
 from receiver.service.receiver_service import ReceiverService
@@ -16,6 +21,10 @@ class ReceiverServiceImpl(ReceiverService):
         if cls.__instance is None:
             cls.__instance = super().__new__(cls)
             cls.__instance.__receiverRepository = ReceiverRepositoryImpl.getInstance()
+
+            cls.__instance.__criticalSectionManager = CriticalSectionManager.getInstance()
+
+            cls.__instance.__receiverLock = threading.Lock()
 
         return cls.__instance
 
@@ -33,7 +42,7 @@ class ReceiverServiceImpl(ReceiverService):
         self.__receiverRepository.injectReceiverAnalyzerChannel(ipcReceiverAnalyzerChannel)
 
     def __blockToAcquireSocket(self):
-        if self.__receiverRepository.getClientSocket() is None:
+        if self.__criticalSectionManager.getClientSocket() is None:
             return True
 
         return False
@@ -45,9 +54,20 @@ class ReceiverServiceImpl(ReceiverService):
 
         ColorPrinter.print_important_message("Receiver 구동 성공!")
 
+        # clientSocketObject = self.__receiverRepository.getClientSocket()
+        clientSocket = self.__criticalSectionManager.getClientSocket()
+        ColorPrinter.print_important_data("requestToReceiveCommand()", clientSocket)
+        clientSocketObject = clientSocket.getSocket()
+
         while True:
             try:
-                receivedData = self.__receiverRepository.receive()
+                with self.__receiverLock:
+                    readyToRead, _, inError = select.select([clientSocketObject], [], [], 0.5)
+
+                    if not readyToRead:
+                        continue
+
+                    receivedData = self.__receiverRepository.receive(clientSocketObject)
 
                 if not receivedData:
                     self.__receiverRepository.closeConnection()
@@ -77,6 +97,11 @@ class ReceiverServiceImpl(ReceiverService):
                     ColorPrinter.print_important_data("processed request", f"{request}")
 
                     self.__receiverRepository.sendDataToCommandAnalyzer(request)
+
+            except ssl.SSLError as sslError:
+                ColorPrinter.print_important_data("receive 중 SSL Error", str(sslError))
+                self.__receiverRepository.closeConnection()
+                break
 
             except BlockingIOError:
                 pass

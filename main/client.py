@@ -32,24 +32,24 @@ if __name__ == "__main__":
     clientSocket = clientSocketService.createClientSocket()
     clientSocketService.connectToTargetHostUnitSuccess()
 
-    transmitterService = TransmitterServiceImpl.getInstance()
-    transmitterService.requestToInjectClientSocket(clientSocket)
-
-    receiverService = ReceiverServiceImpl.getInstance()
-    receiverService.requestToInjectClientSocket(clientSocket)
-
-    commandAnalyzerService = CommandAnalyzerServiceImpl.getInstance()
-    commandExecutorService = CommandExecutorServiceImpl.getInstance()
-
-    threadWorkerService = ThreadWorkerServiceImpl.getInstance()
-    threadWorkerService.createThreadWorker("Receiver", receiverService.requestToReceiveCommand)
-    threadWorkerService.executeThreadWorker("Receiver")
-
-    threadWorkerService.createThreadWorker("CommandAnalyzer", commandAnalyzerService.analysisCommand)
-    threadWorkerService.executeThreadWorker("CommandAnalyzer")
-
-    threadWorkerService.createThreadWorker("CommandExecutor", commandExecutorService.executeCommand)
-    threadWorkerService.executeThreadWorker("CommandExecutor")
-
-    threadWorkerService.createThreadWorker("Transmitter", transmitterService.requestToTransmitResult)
-    threadWorkerService.executeThreadWorker("Transmitter")
+    # transmitterService = TransmitterServiceImpl.getInstance()
+    # # transmitterService.requestToInjectClientSocket(clientSocket)
+    #
+    # receiverService = ReceiverServiceImpl.getInstance()
+    # # receiverService.requestToInjectClientSocket(clientSocket)
+    #
+    # commandAnalyzerService = CommandAnalyzerServiceImpl.getInstance()
+    # commandExecutorService = CommandExecutorServiceImpl.getInstance()
+    #
+    # threadWorkerService = ThreadWorkerServiceImpl.getInstance()
+    # threadWorkerService.createThreadWorker("Receiver", receiverService.requestToReceiveCommand)
+    # threadWorkerService.executeThreadWorker("Receiver")
+    #
+    # threadWorkerService.createThreadWorker("CommandAnalyzer", commandAnalyzerService.analysisCommand)
+    # threadWorkerService.executeThreadWorker("CommandAnalyzer")
+    #
+    # threadWorkerService.createThreadWorker("CommandExecutor", commandExecutorService.executeCommand)
+    # threadWorkerService.executeThreadWorker("CommandExecutor")
+    #
+    # threadWorkerService.createThreadWorker("Transmitter", transmitterService.requestToTransmitResult)
+    # threadWorkerService.executeThreadWorker("Transmitter")

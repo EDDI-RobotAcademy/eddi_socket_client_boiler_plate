@@ -1,7 +1,9 @@
 import json
 import socket
+import threading
 from time import sleep
 
+from critical_section.manager import CriticalSectionManager
 from custom_protocol.entity.custom_protocol import CustomProtocolNumber
 from response_generator.generator import ResponseGenerator
 from transmitter.repository.transmitter_repository_impl import TransmitterRepositoryImpl
@@ -16,6 +18,10 @@ class TransmitterServiceImpl(TransmitterService):
         if cls.__instance is None:
             cls.__instance = super().__new__(cls)
             cls.__instance.__transmitterRepository = TransmitterRepositoryImpl.getInstance()
+
+            cls.__instance.__criticalSectionManager = CriticalSectionManager.getInstance()
+
+            cls.__instance.__transmitterLock = threading.Lock()
 
         return cls.__instance
 
@@ -45,6 +51,9 @@ class TransmitterServiceImpl(TransmitterService):
 
         ColorPrinter.print_important_message("Transmitter 구동 성공!")
 
+        clientSocket = self.__transmitterRepository.getClientSocket()
+        clientSocketObject = clientSocket.getSocket()
+
         while True:
             try:
                 willBeTransmitResponse = self.__transmitterRepository.acquireWillBeTransmit()
@@ -56,10 +65,14 @@ class TransmitterServiceImpl(TransmitterService):
                 if socketResponse is None:
                     continue
 
+                if clientSocketObject.fileno() == -1:  # 소켓이 유효한지 확인
+                    raise socket.error("Socket is closed or invalid")
+
                 dictionarizedResponse = socketResponse.toDictionary()
                 serializedRequestData = json.dumps(dictionarizedResponse, ensure_ascii=False)
 
-                self.__transmitterRepository.transmit(serializedRequestData)
+                with self.__transmitterLock:
+                    self.__transmitterRepository.transmit(serializedRequestData)
 
             except (socket.error, BrokenPipeError) as exception:
                 return None
