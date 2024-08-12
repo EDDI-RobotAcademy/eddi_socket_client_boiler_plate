@@ -38,8 +38,14 @@ class TransmitterServiceImpl(TransmitterService):
     def requestToInjectExecutorTransmitterChannel(self, ipcExecutorTransmitterChannel):
         self.__transmitterRepository.injectExecutorTransmitterChannel(ipcExecutorTransmitterChannel)
 
+    # def __blockToAcquireSocket(self):
+    #     if self.__transmitterRepository.getClientSocket() is None:
+    #         return True
+    #
+    #     return False
+
     def __blockToAcquireSocket(self):
-        if self.__transmitterRepository.getClientSocket() is None:
+        if self.__criticalSectionManager.getClientSocket() is None:
             return True
 
         return False
@@ -51,8 +57,10 @@ class TransmitterServiceImpl(TransmitterService):
 
         ColorPrinter.print_important_message("Transmitter 구동 성공!")
 
-        clientSocket = self.__transmitterRepository.getClientSocket()
-        clientSocketObject = clientSocket.getSocket()
+        # clientSocket = self.__transmitterRepository.getClientSocket()
+        # clientSocketObject = clientSocket.getSocket()
+        clientSocketObject = self.__criticalSectionManager.getClientSocket()
+        ColorPrinter.print_important_data("requestToTransmitResult() -> clientSocketObject", clientSocketObject)
 
         while True:
             try:
@@ -72,7 +80,7 @@ class TransmitterServiceImpl(TransmitterService):
                 serializedRequestData = json.dumps(dictionarizedResponse, ensure_ascii=False)
 
                 with self.__transmitterLock:
-                    self.__transmitterRepository.transmit(serializedRequestData)
+                    self.__transmitterRepository.transmit(clientSocketObject, serializedRequestData)
 
             except (socket.error, BrokenPipeError) as exception:
                 return None

@@ -15,5 +15,5 @@ class TransmitterRepository(ABC):
         pass
 
     @abstractmethod
-    def transmit(self, serializedTransmitData):
+    def transmit(self, clientSocketObject, serializedTransmitData):
         pass
