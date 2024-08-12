@@ -296,3 +296,5 @@ pyrightconfig.json
 
 # *.pem
 *.pem
+*.crt
+*.key

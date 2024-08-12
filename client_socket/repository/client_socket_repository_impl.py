@@ -19,14 +19,12 @@ class ClientSocketRepositoryImpl(ClientSocketRepository):
     def __new__(cls):
         if cls.__instance is None:
             cls.__instance = super().__new__(cls)
-
         return cls.__instance
 
     @classmethod
     def getInstance(cls):
         if cls.__instance is None:
             cls.__instance = cls()
-
         return cls.__instance
 
     def create(self):
@@ -36,10 +34,7 @@ class ClientSocketRepositoryImpl(ClientSocketRepository):
         clientSocketObject = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.__setNonBlocking(clientSocketObject)
 
-        sslClientSocket = sslContext.wrap_socket(clientSocketObject, server_side=False, server_hostname=config('TARGET_HOST'))
-
-        self.__clientSocket = ClientSocket(config('TARGET_HOST'), int(config('TARGET_PORT')), sslClientSocket)
-
+        self.__clientSocket = ClientSocket(config('TARGET_HOST'), int(config('TARGET_PORT')), clientSocketObject)
         return self.__clientSocket
 
     def __setNonBlocking(self, socketObject):
@@ -50,11 +45,9 @@ class ClientSocketRepositoryImpl(ClientSocketRepository):
             self.create()
 
         criticalSectionManager = CriticalSectionManager.getInstance()
-            
         clientSocketObject = self.__clientSocket.getSocket()
+
         ColorPrinter.print_important_data("connectToTargetHostUnitSuccess()", clientSocketObject)
-        # clientSocket = self.__criticalSectionManager.getClientSocket()
-        # clientSocketObject = clientSocket.getSocket()
 
         try:
             clientSocketObject.connect(
@@ -63,31 +56,47 @@ class ClientSocketRepositoryImpl(ClientSocketRepository):
                     self.__clientSocket.getPort(),
                 )
             )
-
-        except BlockingIOError as e:
-            if e.errno != errno.EINPROGRESS:
-                print(f"연결 중 에러 발생: {str(e)}")
-                return
-            print(f"연결 진행 중...")
+        except BlockingIOError:
+            pass
 
         try:
-            ColorPrinter.print_important_data("After Process BlockingIOError", clientSocketObject)
             _, writable, _ = select.select([], [clientSocketObject], [], 10)
-            ColorPrinter.print_important_data("After Process select", clientSocketObject)
-            if writable and clientSocketObject:
-                # print(f"{self.__clientSocket.getHost()}:{self.__clientSocket.getPort()} 연결 성공")
+            if writable:
                 ColorPrinter.print_important_message("연결 가능!")
 
                 try:
-                    if clientSocketObject is None:
-                        raise ValueError("clientSocketObject is None before SSL Handshake")
+                    sslContext = SslTlsContextManager.getSSLContext()
+                    sslClientSocket = sslContext.wrap_socket(clientSocketObject,
+                                                             server_side=False,
+                                                             do_handshake_on_connect=False,
+                                                             server_hostname=config('TARGET_HOST'))
 
-                    ColorPrinter.print_important_message("SSL Handshake 시도!")
-                    clientSocketObject.do_handshake()
-                    # criticalSectionManager.setClientSocket(self.__clientSocket)
-                    ColorPrinter.print_important_message("SSL Handshake Success!")
+                    if sslClientSocket is None:
+                        raise ValueError("wrap_socket returned None")
+
+                    # 핸드셰이크 시도
+                    while True:
+                        try:
+                            ColorPrinter.print_important_message("SSL Handshake 시도!")
+                            sslClientSocket.do_handshake()
+                            ColorPrinter.print_important_message("SSL Handshake Success!")
+                            criticalSectionManager.setClientSocket(sslClientSocket)
+                            break
+
+                        except ssl.SSLWantReadError:
+                            select.select([sslClientSocket], [], [])
+                        except ssl.SSLWantWriteError:
+                            select.select([], [sslClientSocket], [])
+                        except ssl.SSLError as sslError:
+                            ColorPrinter.print_important_data("SSL Handshake Error!", str(sslError))
+                            sslClientSocket.close()
+                            self.__clientSocket = None
+                            return
+
                 except ssl.SSLError as sslError:
-                    ColorPrinter.print_important_data("SSL Handshake Error!", str(sslError))
+                    ColorPrinter.print_important_data("SSL Error during wrap_socket or handshake!", str(sslError))
+                    clientSocketObject.close()
+                    self.__clientSocket = None
 
             else:
                 print(f"{self.__clientSocket.getHost()}:{self.__clientSocket.getPort()} 연결 실패 (타임아웃)")
@@ -95,3 +104,6 @@ class ClientSocketRepositoryImpl(ClientSocketRepository):
 
         except Exception as exception:
             print(f"연결 중 에러 발생: {str(exception)}")
+            if clientSocketObject:
+                clientSocketObject.close()
+            self.__clientSocket = None

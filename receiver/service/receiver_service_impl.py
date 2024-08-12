@@ -1,3 +1,4 @@
+import errno
 import json
 import socket
 import ssl
@@ -54,10 +55,8 @@ class ReceiverServiceImpl(ReceiverService):
 
         ColorPrinter.print_important_message("Receiver 구동 성공!")
 
-        # clientSocketObject = self.__receiverRepository.getClientSocket()
-        clientSocket = self.__criticalSectionManager.getClientSocket()
-        ColorPrinter.print_important_data("requestToReceiveCommand()", clientSocket)
-        clientSocketObject = clientSocket.getSocket()
+        clientSocketObject = self.__criticalSectionManager.getClientSocket()
+        ColorPrinter.print_important_data("requestToReceiveCommand() -> clientSocketObject", clientSocketObject)
 
         while True:
             try:
@@ -70,15 +69,17 @@ class ReceiverServiceImpl(ReceiverService):
                     receivedData = self.__receiverRepository.receive(clientSocketObject)
 
                 if not receivedData:
+                    ColorPrinter.print_important_message("빈 데이터 수신, 연결을 종료합니다.")
                     self.__receiverRepository.closeConnection()
                     break
 
+                # 수신한 데이터가 유효한 JSON인지 확인
                 try:
                     dictionaryData = json.loads(receivedData)
                     ColorPrinter.print_important_data("dictionaryData", dictionaryData)
 
                 except json.JSONDecodeError as e:
-                    ColorPrinter.print_important_data("JSON Decode Error", str(e))
+                    ColorPrinter.print_important_data("JSON Decode Error: 수신된 데이터가 JSON 형식이 아닙니다", str(e))
                     continue
 
                 protocolNumber = dictionaryData.get("command")
@@ -91,12 +92,19 @@ class ReceiverServiceImpl(ReceiverService):
                     ColorPrinter.print_important_data("received protocol",
                                                       f"Protocol Number: {protocolNumber}, Data: {data}")
 
-                    # 요청을 처리합니다.
                     protocol = CustomProtocolNumber(protocolNumber)
                     request = RequestGenerator.generate(protocol, data)
                     ColorPrinter.print_important_data("processed request", f"{request}")
 
                     self.__receiverRepository.sendDataToCommandAnalyzer(request)
+
+            except ssl.SSLWantReadError:
+                select.select([clientSocketObject], [], [])
+                continue
+
+            except ssl.SSLWantWriteError:
+                select.select([], [clientSocketObject], [])
+                continue
 
             except ssl.SSLError as sslError:
                 ColorPrinter.print_important_data("receive 중 SSL Error", str(sslError))
@@ -107,12 +115,13 @@ class ReceiverServiceImpl(ReceiverService):
                 pass
 
             except socket.error as socketException:
-                if socketException.errno == socket.errno.EAGAIN == socket.errno.EWOULDBLOCK:
+                if socketException.errno in (errno.EAGAIN, errno.EWOULDBLOCK):
                     ColorPrinter.print_important_message("문제 없음")
                     sleep(0.5)
-
                 else:
                     ColorPrinter.print_important_message("수신 중 에러")
+                    self.__receiverRepository.closeConnection()
+                    break
 
             except (socket.error, BrokenPipeError) as exception:
                 ColorPrinter.print_important_message("Broken Pipe")
