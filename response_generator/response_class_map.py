@@ -13,3 +13,7 @@ class ResponseClassMap:
     @staticmethod
     def getResponseClass(responseTypeName):
         return ResponseClassMap.responseClassMap.get(responseTypeName)
+
+    @staticmethod
+    def addResponseClass(responseTypeName, responseClass):
+        ResponseClassMap.responseClassMap[responseTypeName] = responseClass
