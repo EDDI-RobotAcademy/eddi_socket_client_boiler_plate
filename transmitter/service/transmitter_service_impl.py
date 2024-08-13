@@ -57,8 +57,6 @@ class TransmitterServiceImpl(TransmitterService):
 
         ColorPrinter.print_important_message("Transmitter 구동 성공!")
 
-        # clientSocket = self.__transmitterRepository.getClientSocket()
-        # clientSocketObject = clientSocket.getSocket()
         clientSocketObject = self.__criticalSectionManager.getClientSocket()
         ColorPrinter.print_important_data("requestToTransmitResult() -> clientSocketObject", clientSocketObject)
 
