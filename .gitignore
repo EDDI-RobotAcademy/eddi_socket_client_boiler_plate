@@ -293,3 +293,8 @@ pyrightconfig.json
 
 # exclude DS_Store
 .DS_Store
+
+# *.pem
+*.pem
+*.crt
+*.key
