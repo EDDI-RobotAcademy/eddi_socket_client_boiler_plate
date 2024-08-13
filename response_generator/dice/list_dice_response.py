@@ -1,4 +1,4 @@
-from request_generator.base_request import BaseResponse
+from response_generator.base_response import BaseResponse
 from response_generator.response_type import ResponseType
 
 
