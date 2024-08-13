@@ -6,6 +6,7 @@ from custom_protocol.service.custom_protocol_service_impl import CustomProtocolS
 from dice.service.dice_service_impl import DiceServiceImpl
 from ipc_queue.repository.ipc_queue_repository_impl import IPCQueueRepositoryImpl
 from ipc_queue.service.ipc_queue_service_impl import IPCQueueServiceImpl
+from parameter_test.service.parameter_test_service_impl import ParameterTestServiceImpl
 from receiver.service.receiver_service_impl import ReceiverServiceImpl
 from task_worker.service.task_worker_service_impl import TaskWorkerServiceImpl
 from thread_worker.service.thread_worker_service_impl import ThreadWorkerServiceImpl
@@ -34,6 +35,7 @@ class DomainInitializer:
     def initCustomProtocolDomain():
         customProtocolService = CustomProtocolServiceImpl.getInstance()
         diceService = DiceServiceImpl.getInstance()
+        parameterTestService = ParameterTestServiceImpl.getInstance()
 
         # 디폴트 프로토콜 등록을 여기서 했음
         customProtocolService.registerCustomProtocol(
@@ -44,6 +46,21 @@ class DomainInitializer:
         customProtocolService.registerCustomProtocol(
             CustomProtocolNumber.LIST_DICE,
             diceService.diceList
+        )
+
+        customProtocolService.registerCustomProtocol(
+            CustomProtocolNumber.ONE_PARAMETERS,
+            parameterTestService.useOneParameters
+        )
+
+        customProtocolService.registerCustomProtocol(
+            CustomProtocolNumber.TWO_PARAMETERS,
+            parameterTestService.useTwoParameters
+        )
+
+        customProtocolService.registerCustomProtocol(
+            CustomProtocolNumber.N_PARAMETERS,
+            parameterTestService.useNParameters
         )
 
     @staticmethod
