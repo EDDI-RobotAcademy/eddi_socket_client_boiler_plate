@@ -23,3 +23,7 @@ class RequestClassMap:
     @staticmethod
     def getRequestClass(requestTypeName):
         return RequestClassMap.requestClassMap.get(requestTypeName)
+
+    @staticmethod
+    def addRequestClass(requestTypeName, requestClass):
+        RequestClassMap.requestClassMap[requestTypeName] = requestClass
