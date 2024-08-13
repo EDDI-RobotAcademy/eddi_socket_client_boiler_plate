@@ -13,3 +13,7 @@ class ParameterTestService(ABC):
     @abstractmethod
     def useNParameters(self, *args, **kwargs):
         pass
+
+    @abstractmethod
+    def multiInputMultiOutput(self, *args, **kwargs):
+        pass

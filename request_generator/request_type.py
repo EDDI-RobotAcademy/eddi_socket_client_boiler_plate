@@ -7,3 +7,5 @@ class RequestType(Enum):
     ONE_PARAMETERS = 11
     TWO_PARAMETERS = 12
     N_PARAMETERS = 13
+
+    N_PARAMETERS_GATHERING_OUTPUT = 21

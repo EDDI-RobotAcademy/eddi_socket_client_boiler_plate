@@ -63,6 +63,11 @@ class DomainInitializer:
             parameterTestService.useNParameters
         )
 
+        customProtocolService.registerCustomProtocol(
+            CustomProtocolNumber.N_PARAMETERS_GATHERING_OUTPUT,
+            parameterTestService.multiInputMultiOutput
+        )
+
     @staticmethod
     def initClientSocketDomain():
         ClientSocketServiceImpl.getInstance()

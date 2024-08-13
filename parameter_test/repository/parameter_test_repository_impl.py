@@ -47,4 +47,21 @@ class ParameterTestRepositoryImpl(ParameterTestRepository):
             print(f"{red_text}Keyword argument {key}:{reset_color} {green_text}{value}{reset_color}")
 
         return totalParameters
-    
+
+    def multiInputMultiOutput(self, *args, **kwargs):
+        sum = 0
+        for index, argument in enumerate(args, 1):
+            sum += argument
+
+        list1 = [1, 2, 3, 4, 5]
+        list2 = ['a', 'b', 'c']
+        simpleIntValue = 42
+        anotherStringValue = "example"
+
+        return {
+            "sum": sum,
+            "list1": list1,
+            "list2": list2,
+            "simpleIntValue": simpleIntValue,
+            "anotherStringValue": anotherStringValue
+        }

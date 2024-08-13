@@ -27,3 +27,6 @@ class ParameterTestServiceImpl(ParameterTestService):
 
     def useNParameters(self, *args, **kwargs):
         self.__parameterTestRepository.useNParameters(*args, **kwargs)
+
+    def multiInputMultiOutput(self, *args, **kwargs):
+        return self.__parameterTestRepository.multiInputMultiOutput(*args, **kwargs)

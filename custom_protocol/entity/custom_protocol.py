@@ -9,6 +9,8 @@ class CustomProtocolNumber(Enum):
     TWO_PARAMETERS = 12
     N_PARAMETERS = 13
 
+    N_PARAMETERS_GATHERING_OUTPUT = 21
+
     @classmethod
     def hasValue(cls, value):
         return any(value == item.value for item in cls)
