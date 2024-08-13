@@ -1,3 +1,4 @@
+from critical_section.manager import CriticalSectionManager
 from receiver.repository.receiver_repository import ReceiverRepository
 from utility.color_print import ColorPrinter
 
@@ -34,8 +35,7 @@ class ReceiverRepositoryImpl(ReceiverRepository):
     def sendDataToCommandAnalyzer(self, decodedData):
         self.__ipcReceiverAnalyzerChannel.put(decodedData)
 
-    def receive(self):
-        clientSocketObject = self.__clientSocket.getSocket()
+    def receive(self, clientSocketObject):
         receivedData = clientSocketObject.recv(self.SOCKET_BUFFER_SIZE)
         return receivedData
 

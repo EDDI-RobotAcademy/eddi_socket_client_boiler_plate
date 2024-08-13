@@ -15,7 +15,7 @@ class ReceiverRepository(ABC):
         pass
 
     @abstractmethod
-    def receive(self):
+    def receive(self, clientSocketObject):
         pass
 
     @abstractmethod
