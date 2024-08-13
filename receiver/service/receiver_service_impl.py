@@ -129,7 +129,7 @@ class ReceiverServiceImpl(ReceiverService):
                 break
 
             except Exception as exception:
-                ColorPrinter.print_important_data("Receiver 정보", str(exception))
+                ColorPrinter.print_important_data("Receiver Exception 정보", str(exception))
 
             finally:
                 sleep(0.5)

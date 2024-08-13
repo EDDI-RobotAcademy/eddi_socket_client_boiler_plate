@@ -1,8 +1,8 @@
-from request_generator.base_request import BaseResponse
+from request_generator.base_request import BaseRequest
 from request_generator.request_type import RequestType
 
 
-class ListDiceRequest(BaseResponse):
+class ListDiceRequest(BaseRequest):
     def __init__(self):
         self.__protocolNumber = RequestType.LIST_DICE.value
 

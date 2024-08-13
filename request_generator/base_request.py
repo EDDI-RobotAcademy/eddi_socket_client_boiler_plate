@@ -1,4 +1,4 @@
-class BaseResponse:
+class BaseRequest:
     def toDictionary(self):
         raise NotImplementedError
 
