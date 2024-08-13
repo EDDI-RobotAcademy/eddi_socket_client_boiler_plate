@@ -25,18 +25,12 @@ if __name__ == "__main__":
         ColorPrinter.print_important_message("범용 운영체제 외에는 실행 할 수 없습니다!")
         exit(1)
 
-    # SslTlsClientContextManager.initSslTlsContext()
-    # sslContext = SslTlsClientContextManager.getSSLContext()
-
     clientSocketService = ClientSocketServiceImpl.getInstance()
     clientSocket = clientSocketService.createClientSocket()
     clientSocketService.connectToTargetHostUnitSuccess()
 
     transmitterService = TransmitterServiceImpl.getInstance()
-    # transmitterService.requestToInjectClientSocket(clientSocket)
-
     receiverService = ReceiverServiceImpl.getInstance()
-    # receiverService.requestToInjectClientSocket(clientSocket)
 
     commandAnalyzerService = CommandAnalyzerServiceImpl.getInstance()
     commandExecutorService = CommandExecutorServiceImpl.getInstance()

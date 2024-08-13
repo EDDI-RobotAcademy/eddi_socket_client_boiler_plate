@@ -36,9 +36,6 @@ class ReceiverRepositoryImpl(ReceiverRepository):
         self.__ipcReceiverAnalyzerChannel.put(decodedData)
 
     def receive(self, clientSocketObject):
-        # criticalSectionManager = CriticalSectionManager.getInstance()
-        # clientSocket = criticalSectionManager.getClientSocket()
-        # clientSocketObject = clientSocket.getSocket()
         receivedData = clientSocketObject.recv(self.SOCKET_BUFFER_SIZE)
         return receivedData
 

@@ -34,7 +34,6 @@ class TransmitterRepositoryImpl(TransmitterRepository):
         return self.__ipcExecutorTransmitterChannel.get()
 
     def transmit(self, clientSocketObject, serializedTransmitData):
-        # clientSocketObject = self.__clientSocket.getSocket()
         clientSocketObject.sendall(serializedTransmitData.encode())
 
 
