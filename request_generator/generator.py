@@ -9,7 +9,7 @@ class RequestGenerator:
         requestClass = RequestClassMap.getRequestClass(protocol.name)
         if requestClass:
             if data:
-                return requestClass(**data)
+                return requestClass(data=data)
             else:
                 return requestClass()
 

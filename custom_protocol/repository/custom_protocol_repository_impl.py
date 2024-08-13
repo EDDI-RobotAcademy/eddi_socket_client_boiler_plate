@@ -33,13 +33,21 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
         self.__protocolTable[protocolNumber.value] = customFunction
 
     def execute(self, requestObject):
-        # print(f"CommandExecutor requestObject -> protocolNumber: {requestObject.getProtocolNumber()}, "
-        #       f"customFunction: {self.__protocolTable[requestObject.getProtocolNumber()]}")
+        ColorPrinter.print_important_data("CommandExecutor requestObject -> protocolNumber", requestObject.getProtocolNumber())
+        ColorPrinter.print_important_data("customFunction", self.__protocolTable[requestObject.getProtocolNumber()])
 
         userDefinedFunction = self.__protocolTable[requestObject.getProtocolNumber()]
-        
-        # TODO: 아직 파라미터 없는 함수만 처리되는 상황임
-        result = userDefinedFunction()
+
+        if hasattr(requestObject, 'getParameterList') and callable(requestObject.getParameterList):
+            parameterList = requestObject.getParameterList()
+            ColorPrinter.print_important_data("parameterList", parameterList)
+            if parameterList is not None:
+                result = userDefinedFunction(*parameterList)
+            else:
+                result = userDefinedFunction()
+        else:
+            result = userDefinedFunction()
+
         ColorPrinter.print_important_data("result", result)
 
         return result
