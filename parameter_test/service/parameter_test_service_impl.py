@@ -26,4 +26,4 @@ class ParameterTestServiceImpl(ParameterTestService):
         self.__parameterTestRepository.useTwoParameters(first, second)
 
     def useNParameters(self, *args, **kwargs):
-        self.__parameterTestRepository.useNParameters(args, kwargs)
+        self.__parameterTestRepository.useNParameters(*args, **kwargs)

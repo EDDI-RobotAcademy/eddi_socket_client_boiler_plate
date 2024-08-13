@@ -36,5 +36,15 @@ class ParameterTestRepositoryImpl(ParameterTestRepository):
         ColorPrinter.print_important_data("args", args)
         ColorPrinter.print_important_data("kwargs", kwargs)
 
+        red_text = "\033[91m"
+        green_text = "\033[92m"
+        reset_color = "\033[0m"
+
+        for i, arg in enumerate(args, 1):
+            print(f"{red_text}Argument {i}:{reset_color} {green_text}{arg}{reset_color}")
+
+        for key, value in kwargs.items():
+            print(f"{red_text}Keyword argument {key}:{reset_color} {green_text}{value}{reset_color}")
+
         return totalParameters
     
