@@ -12,6 +12,7 @@ from custom_protocol.entity.custom_protocol import CustomProtocolNumber
 from receiver.repository.receiver_repository_impl import ReceiverRepositoryImpl
 from receiver.service.receiver_service import ReceiverService
 from request_generator.generator import RequestGenerator
+from request_generator.request_class_map import RequestClassMap
 from utility.color_print import ColorPrinter
 
 try:
@@ -97,6 +98,7 @@ class ReceiverServiceImpl(ReceiverService):
                 if protocolNumber is not None:
                     ColorPrinter.print_important_data("received protocol",
                                                       f"Protocol Number: {protocolNumber}, Data: {data}")
+                    RequestClassMap.printRequestClassMap()
 
                     try:
                         protocol = CustomProtocolNumber(protocolNumber)
