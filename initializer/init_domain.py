@@ -8,12 +8,17 @@ from ipc_queue.repository.ipc_queue_repository_impl import IPCQueueRepositoryImp
 from ipc_queue.service.ipc_queue_service_impl import IPCQueueServiceImpl
 from parameter_test.service.parameter_test_service_impl import ParameterTestServiceImpl
 from receiver.service.receiver_service_impl import ReceiverServiceImpl
+from request_generator.request_class_map import RequestClassMap
 from task_worker.service.task_worker_service_impl import TaskWorkerServiceImpl
 from thread_worker.service.thread_worker_service_impl import ThreadWorkerServiceImpl
 from transmitter.service.transmitter_service_impl import TransmitterServiceImpl
 
 
 class DomainInitializer:
+    @staticmethod
+    def initRequestClassMapDomain():
+        RequestClassMap.getInstance()
+
     @staticmethod
     def initThreadWorkerDomain():
         ThreadWorkerServiceImpl.getInstance()
@@ -110,6 +115,8 @@ class DomainInitializer:
 
     @staticmethod
     def initEachDomain():
+        DomainInitializer.initRequestClassMapDomain()
+
         DomainInitializer.initDiceDomain()
         DomainInitializer.initCustomProtocolDomain()
 
