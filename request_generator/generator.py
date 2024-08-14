@@ -6,7 +6,9 @@ from request_generator.request_class_map import RequestClassMap
 class RequestGenerator:
     @staticmethod
     def generate(protocol, data):
-        requestClass = RequestClassMap.getRequestClass(protocol.name)
+        requestClassMapInstance = RequestClassMap.getInstance()
+
+        requestClass = requestClassMapInstance.getRequestClass(protocol.name)
         if requestClass:
             if data:
                 return requestClass(data=data)
