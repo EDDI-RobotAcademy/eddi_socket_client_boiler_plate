@@ -2,6 +2,12 @@ from custom_protocol.entity.custom_protocol import CustomProtocolNumber
 from custom_protocol.repository.custom_protocol_repository import CustomProtocolRepository
 from utility.color_print import ColorPrinter
 
+try:
+    from user_defined_protocol.protocol import UserDefinedProtocolNumber
+except ImportError:
+    UserDefinedProtocolNumber = None
+    ColorPrinter.print_important_message("UserDefinedProtocolNumber는 사용자가 추가적인 프로토콜을 확장하기 위해 사용합니다.")
+
 
 class CustomProtocolRepositoryImpl(CustomProtocolRepository):
     __instance = None
@@ -25,8 +31,9 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
 
         if protocolNumber is None:
             raise ValueError("프로토콜 번호가 None입니다.")
-        if not CustomProtocolNumber.hasValue(protocolNumber.value):
-            raise ValueError("프로토콜을 등록 시 반드시 CustomProtocolNumber에 정의된 값을 사용하세요")
+        if not (CustomProtocolNumber.hasValue(protocolNumber.value) or
+                (UserDefinedProtocolNumber is not None and UserDefinedProtocolNumber.hasValue(protocolNumber.value))):
+            raise ValueError("프로토콜을 등록 시 반드시 CustomProtocolNumber 혹은 UserDefinedProtocolNumber에 정의된 값을 사용하세요")
         if not callable(customFunction):
             raise  ValueError("customFunction은 프로토콜에 대응하는 함수입니다")
 
