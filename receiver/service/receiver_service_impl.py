@@ -14,6 +14,12 @@ from receiver.service.receiver_service import ReceiverService
 from request_generator.generator import RequestGenerator
 from utility.color_print import ColorPrinter
 
+try:
+    from user_defined_protocol.protocol import UserDefinedProtocolNumber
+except ImportError:
+    UserDefinedProtocolNumber = None
+    ColorPrinter.print_important_message("UserDefinedProtocolNumber는 사용자가 추가적인 프로토콜을 확장하기 위해 사용합니다.")
+
 
 class ReceiverServiceImpl(ReceiverService):
     __instance = None
@@ -92,7 +98,19 @@ class ReceiverServiceImpl(ReceiverService):
                     ColorPrinter.print_important_data("received protocol",
                                                       f"Protocol Number: {protocolNumber}, Data: {data}")
 
-                    protocol = CustomProtocolNumber(protocolNumber)
+                    try:
+                        protocol = CustomProtocolNumber(protocolNumber)
+
+                    except ValueError:
+                        if UserDefinedProtocolNumber is not None:
+                            try:
+                                protocol = UserDefinedProtocolNumber(protocolNumber)
+                            except ValueError:
+                                ColorPrinter.print_important_data("CustomProtocolNumber 혹은 UserDefinedProtocolNumber에서 지원하지 않는 프로토콜입니다.")
+                        else:
+                            ColorPrinter.print_important_message("Socket Client는 CustomProtocolNumber만 지원하므로 DLLS-Client 구성을 하세요!")
+                            continue
+
                     request = RequestGenerator.generate(protocol, data)
                     ColorPrinter.print_important_data("processed request", f"{request}")
 
