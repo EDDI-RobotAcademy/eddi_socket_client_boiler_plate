@@ -98,7 +98,9 @@ class ReceiverServiceImpl(ReceiverService):
                 if protocolNumber is not None:
                     ColorPrinter.print_important_data("received protocol",
                                                       f"Protocol Number: {protocolNumber}, Data: {data}")
-                    RequestClassMap.printRequestClassMap()
+
+                    requestClassMapInstance = RequestClassMap.getInstance()
+                    requestClassMapInstance.printRequestClassMap()
 
                     try:
                         protocol = CustomProtocolNumber(protocolNumber)
