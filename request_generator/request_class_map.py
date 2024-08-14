@@ -41,7 +41,7 @@ class RequestClassMap:
         return self.requestClassMap.get(requestTypeName)
 
     def addRequestClass(self, requestTypeName, requestClass):
-        self.requestClassMap[requestTypeName] = requestClass
+        self.requestClassMap[requestTypeName.name] = requestClass
 
     def printRequestClassMap(self, ):
         ColorPrinter.print_important_data("RequestClassMap", self.requestClassMap)
