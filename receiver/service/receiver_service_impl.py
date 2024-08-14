@@ -106,8 +106,6 @@ class ReceiverServiceImpl(ReceiverService):
                     ColorPrinter.print_important_data("received protocol",
                                                       f"Protocol Number: {protocolNumber}, Data: {data}")
 
-                    self.__requestClassMapInstance.printRequestClassMap()
-
                     try:
                         protocol = CustomProtocolNumber(protocolNumber)
 

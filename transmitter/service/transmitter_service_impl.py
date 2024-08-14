@@ -4,7 +4,6 @@ import threading
 from time import sleep
 
 from critical_section.manager import CriticalSectionManager
-from custom_protocol.entity.custom_protocol import CustomProtocolNumber
 from response_generator.generator import ResponseGenerator
 from transmitter.repository.transmitter_repository_impl import TransmitterRepositoryImpl
 from transmitter.service.transmitter_service import TransmitterService
@@ -13,6 +12,9 @@ from utility.color_print import ColorPrinter
 
 class TransmitterServiceImpl(TransmitterService):
     __instance = None
+
+    __responseClassMapInstance = None
+    __responseGeneratorInstance = ResponseGenerator.getInstance()
 
     def __new__(cls):
         if cls.__instance is None:
@@ -31,6 +33,10 @@ class TransmitterServiceImpl(TransmitterService):
             cls.__instance = cls()
 
         return cls.__instance
+
+    def requestToInjectUserDefinedResponseClassMapInstance(self, responseClassMapInstance):
+        self.__responseClassMapInstance = responseClassMapInstance
+        self.__responseGeneratorInstance.requestToInjectUserDefinedResponseClassMapInstance(responseClassMapInstance)
 
     def requestToInjectClientSocket(self, clientSocket):
         self.__transmitterRepository.injectClientSocket(clientSocket)
@@ -66,7 +72,8 @@ class TransmitterServiceImpl(TransmitterService):
                 ColorPrinter.print_important_data("Transmitter -> 전송할 데이터", willBeTransmitResponse)
 
                 protocolNumber, response = willBeTransmitResponse
-                socketResponse = ResponseGenerator.generate(protocolNumber, response)
+                socketResponse = self.__responseGeneratorInstance.generate(protocolNumber, response)
+                # socketResponse = ResponseGenerator.generate(protocolNumber, response)
 
                 if socketResponse is None:
                     continue
