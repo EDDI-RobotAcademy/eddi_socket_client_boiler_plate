@@ -7,6 +7,8 @@ from initializer.init_domain import DomainInitializer
 from os_detector.detect import OperatingSystemDetector
 from os_detector.operating_system import OperatingSystem
 from receiver.service.receiver_service_impl import ReceiverServiceImpl
+from request_generator.request_class_map import RequestClassMap
+from response_generator.response_class_map import ResponseClassMap
 from ssl_tls.ssl_tls_context_manager import SslTlsContextManager
 from task_worker.service.task_worker_service_impl import TaskWorkerServiceImpl
 from thread_worker.service.thread_worker_service_impl import ThreadWorkerServiceImpl
@@ -29,8 +31,14 @@ if __name__ == "__main__":
     clientSocket = clientSocketService.createClientSocket()
     clientSocketService.connectToTargetHostUnitSuccess()
 
+    requestClassMapInstance = RequestClassMap.getInstance()
+    responseClassMapInstance = ResponseClassMap.getInstance()
+
     transmitterService = TransmitterServiceImpl.getInstance()
+    transmitterService.requestToInjectUserDefinedResponseClassMapInstance(responseClassMapInstance)
+
     receiverService = ReceiverServiceImpl.getInstance()
+    receiverService.requestToInjectUserDefinedRequestClassMapInstance(requestClassMapInstance)
 
     commandAnalyzerService = CommandAnalyzerServiceImpl.getInstance()
     commandExecutorService = CommandExecutorServiceImpl.getInstance()

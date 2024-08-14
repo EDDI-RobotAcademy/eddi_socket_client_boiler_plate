@@ -4,16 +4,29 @@ from response_generator.response_type import ResponseType
 
 
 class ResponseClassMap:
-    responseClassMap = {
-        ResponseType.LIST_DICE.name: ListDiceResponse,
+    __instance = None
 
-        ResponseType.N_PARAMETERS_GATHERING_OUTPUT.name: NParametersGatheringOutputResponse,
-    }
+    def __new__(cls):
+        if cls.__instance is None:
+            cls.__instance = super().__new__(cls)
 
-    @staticmethod
-    def getResponseClass(responseTypeName):
-        return ResponseClassMap.responseClassMap.get(responseTypeName)
+            cls.__instance.responseClassMap = {
+                ResponseType.LIST_DICE.name: ListDiceResponse,
 
-    @staticmethod
-    def addResponseClass(responseTypeName, responseClass):
-        ResponseClassMap.responseClassMap[responseTypeName] = responseClass
+                ResponseType.N_PARAMETERS_GATHERING_OUTPUT.name: NParametersGatheringOutputResponse,
+            }
+
+        return cls.__instance
+
+    @classmethod
+    def getInstance(cls):
+        if cls.__instance is None:
+            cls.__instance = cls()
+
+        return cls.__instance
+
+    def getResponseClass(self, responseTypeName):
+        return self.responseClassMap.get(responseTypeName)
+
+    def addResponseClass(self, responseTypeName, responseClass):
+        self.responseClassMap[responseTypeName.name] = responseClass
