@@ -25,6 +25,9 @@ except ImportError:
 class ReceiverServiceImpl(ReceiverService):
     __instance = None
 
+    __requestClassMapInstance = None
+    __requestGeneratorInstance = RequestGenerator.getInstance()
+
     def __new__(cls):
         if cls.__instance is None:
             cls.__instance = super().__new__(cls)
@@ -42,6 +45,10 @@ class ReceiverServiceImpl(ReceiverService):
             cls.__instance = cls()
 
         return cls.__instance
+
+    def requestToInjectUserDefinedRequestClassMapInstance(self, requestClassMapInstance):
+        self.__requestClassMapInstance = requestClassMapInstance
+        self.__requestGeneratorInstance.requestToInjectUserDefinedRequestClassMapInstance(requestClassMapInstance)
 
     def requestToInjectClientSocket(self, clientSocket):
         self.__receiverRepository.injectClientSocket(clientSocket)
@@ -99,8 +106,7 @@ class ReceiverServiceImpl(ReceiverService):
                     ColorPrinter.print_important_data("received protocol",
                                                       f"Protocol Number: {protocolNumber}, Data: {data}")
 
-                    requestClassMapInstance = RequestClassMap.getInstance()
-                    requestClassMapInstance.printRequestClassMap()
+                    self.__requestClassMapInstance.printRequestClassMap()
 
                     try:
                         protocol = CustomProtocolNumber(protocolNumber)
@@ -115,7 +121,7 @@ class ReceiverServiceImpl(ReceiverService):
                             ColorPrinter.print_important_message("Socket Client는 CustomProtocolNumber만 지원하므로 DLLS-Client 구성을 하세요!")
                             continue
 
-                    request = RequestGenerator.generate(protocol, data)
+                    request = self.__requestGeneratorInstance.generate(protocol, data)
                     ColorPrinter.print_important_data("processed request", f"{request}")
 
                     self.__receiverRepository.sendDataToCommandAnalyzer(request)
