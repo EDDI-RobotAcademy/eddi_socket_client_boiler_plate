@@ -4,6 +4,7 @@ from parameter_test.service.request.n_parameter_request import NParametersReques
 from parameter_test.service.request.n_parameters_gathering_output_request import NParametersGatheringOutputRequest
 from parameter_test.service.request.one_parameter_request import OneParametersRequest
 from parameter_test.service.request.two_parameter_request import TwoParametersRequest
+from utility.color_print import ColorPrinter
 
 from .request_type import RequestType
 
@@ -27,3 +28,8 @@ class RequestClassMap:
     @staticmethod
     def addRequestClass(requestTypeName, requestClass):
         RequestClassMap.requestClassMap[requestTypeName] = requestClass
+
+
+    @staticmethod
+    def printRequestClassMap():
+        ColorPrinter.print_important_data("RequestClassMap", RequestClassMap.requestClassMap)
