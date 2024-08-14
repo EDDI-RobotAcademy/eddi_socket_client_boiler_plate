@@ -45,6 +45,8 @@ class ResponseGenerator:
                 ColorPrinter.print_important_message("Socket Client는 CustomProtocolNumber만 지원하므로 DLLS-Client 구성을 하세요!")
                 return None
 
+        ColorPrinter.print_important_data("ResponseGenerator() protocolEnum", protocolEnum)
+
         # responseClass = ResponseClassMap.getResponseClass(protocolEnum.name)
         responseClass = self.__responseClassMapInstance.getResponseClass(protocolEnum.name)
 
