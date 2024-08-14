@@ -25,6 +25,8 @@ except ImportError:
 class ReceiverServiceImpl(ReceiverService):
     __instance = None
 
+    __requestClassMapInstance = None
+
     def __new__(cls):
         if cls.__instance is None:
             cls.__instance = super().__new__(cls)
@@ -42,6 +44,9 @@ class ReceiverServiceImpl(ReceiverService):
             cls.__instance = cls()
 
         return cls.__instance
+
+    def requestToInjectUserDefinedRequestClassMapInstance(self, requestClassMapInstance):
+        self.__requestClassMapInstance = requestClassMapInstance
 
     def requestToInjectClientSocket(self, clientSocket):
         self.__receiverRepository.injectClientSocket(clientSocket)
@@ -99,8 +104,7 @@ class ReceiverServiceImpl(ReceiverService):
                     ColorPrinter.print_important_data("received protocol",
                                                       f"Protocol Number: {protocolNumber}, Data: {data}")
 
-                    requestClassMapInstance = RequestClassMap.getInstance()
-                    requestClassMapInstance.printRequestClassMap()
+                    self.__requestClassMapInstance.printRequestClassMap()
 
                     try:
                         protocol = CustomProtocolNumber(protocolNumber)
