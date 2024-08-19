@@ -1,3 +1,5 @@
+import asyncio
+
 from dice.entity.dice import Dice
 from dice.repository.dice_repository import DiceRepository
 
@@ -28,3 +30,9 @@ class DiceRepositoryImpl(DiceRepository):
             print(f"dice: {dice}")
 
         return self.__diceList
+
+    async def asyncRoll(self):
+        await asyncio.sleep(1)
+
+        dice = Dice()
+        self.__diceList.append(dice)

@@ -1,3 +1,6 @@
+import asyncio
+import concurrent
+
 from custom_protocol.entity.custom_protocol import CustomProtocolNumber
 from custom_protocol.repository.custom_protocol_repository import CustomProtocolRepository
 from utility.color_print import ColorPrinter
@@ -39,21 +42,34 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
 
         self.__protocolTable[protocolNumber.value] = customFunction
 
+    def __executeSyncronizeFunction(self, userDefinedFunction, parameterList):
+        if parameterList:
+            return userDefinedFunction(*parameterList)
+
+        return userDefinedFunction()
+
+    def __extractParameterList(self, requestObject):
+        if hasattr(requestObject, 'getParameterList') and callable(requestObject.getParameterList):
+            parameterList = requestObject.getParameterList()
+            ColorPrinter.print_important_data("parameterList", parameterList)
+            return parameterList
+
+        return []
+
     def execute(self, requestObject):
         ColorPrinter.print_important_data("CommandExecutor requestObject -> protocolNumber", requestObject.getProtocolNumber())
         ColorPrinter.print_important_data("customFunction", self.__protocolTable[requestObject.getProtocolNumber()])
 
         userDefinedFunction = self.__protocolTable[requestObject.getProtocolNumber()]
 
-        if hasattr(requestObject, 'getParameterList') and callable(requestObject.getParameterList):
-            parameterList = requestObject.getParameterList()
-            ColorPrinter.print_important_data("parameterList", parameterList)
-            if parameterList is not None:
-                result = userDefinedFunction(*parameterList)
-            else:
-                result = userDefinedFunction()
+        parameterList = self.__extractParameterList(requestObject)
+
+        if asyncio.iscoroutinefunction(userDefinedFunction):
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(asyncio.run, userDefinedFunction(*parameterList))
+                result = future.result()
         else:
-            result = userDefinedFunction()
+            result = self.__executeSyncronizeFunction(userDefinedFunction, parameterList)
 
         ColorPrinter.print_important_data("result", result)
 
