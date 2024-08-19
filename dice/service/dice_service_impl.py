@@ -28,3 +28,6 @@ class DiceServiceImpl(DiceService):
         diceList = self.__diceRepository.list()
         return ListDiceResponse(CustomProtocolNumber.LIST_DICE, diceList)
 
+    async def asyncRollDice(self):
+        await self.__diceRepository.asyncRoll()
+

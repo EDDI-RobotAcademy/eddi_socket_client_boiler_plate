@@ -5,6 +5,8 @@ class CustomProtocolNumber(Enum):
     ROLL_DICE = 1
     LIST_DICE = 2
 
+    ASYNC_ROLL_DICE = 4
+
     ONE_PARAMETERS = 11
     TWO_PARAMETERS = 12
     N_PARAMETERS = 13

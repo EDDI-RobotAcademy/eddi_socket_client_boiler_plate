@@ -1,3 +1,4 @@
+from dice.service.request.async_roll_dice_request import AsyncRollDiceRequest
 from dice.service.request.list_dice_request import ListDiceRequest
 from dice.service.request.roll_dice_request import RollDiceRequest
 from parameter_test.service.request.n_parameter_request import NParametersRequest
@@ -20,6 +21,8 @@ class RequestClassMap:
             cls.__instance.requestClassMap = {
                 RequestType.ROLL_DICE.name: RollDiceRequest,
                 RequestType.LIST_DICE.name: ListDiceRequest,
+
+                RequestType.ASYNC_ROLL_DICE.name: AsyncRollDiceRequest,
 
                 RequestType.ONE_PARAMETERS.name: OneParametersRequest,
                 RequestType.TWO_PARAMETERS.name: TwoParametersRequest,

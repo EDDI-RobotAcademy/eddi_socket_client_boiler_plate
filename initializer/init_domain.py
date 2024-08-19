@@ -59,6 +59,11 @@ class DomainInitializer:
         )
 
         customProtocolService.registerCustomProtocol(
+            CustomProtocolNumber.ASYNC_ROLL_DICE,
+            diceService.asyncRollDice
+        )
+
+        customProtocolService.registerCustomProtocol(
             CustomProtocolNumber.ONE_PARAMETERS,
             parameterTestService.useOneParameters
         )

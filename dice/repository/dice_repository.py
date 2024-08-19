@@ -9,3 +9,7 @@ class DiceRepository(ABC):
     @abstractmethod
     def list(self):
         pass
+
+    @abstractmethod
+    async def asyncRoll(self):
+        pass
