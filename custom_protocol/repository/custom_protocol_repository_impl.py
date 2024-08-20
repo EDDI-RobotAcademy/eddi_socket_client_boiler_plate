@@ -88,39 +88,55 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
         return result
 
     def macosThreadExecutionFunction(self, userDefinedFunction, parameterList):
-        def run_in_thread(loop, userDefinedFunction, parameterList, resultQueue):
-            ColorPrinter.print_important_message("run_in_thread start")
-            asyncio.set_event_loop(loop)
-            ColorPrinter.print_important_message("run_in_thread loop creation")
-            try:
-                future = asyncio.run_coroutine_threadsafe(self.__executeAsyncFunction(userDefinedFunction, parameterList), loop)
-                ColorPrinter.print_important_data("run_in_thread run_coroutine_threadsafe", future)
-                resultQueue.put(future.result())
-                ColorPrinter.print_important_message("finish internal thread")
-            except Exception as e:
-                resultQueue.put(e)
-
         loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
         ColorPrinter.print_important_message("macosThreadExecutionFunction loop creation")
-        resultQueue = Queue()
-        ColorPrinter.print_important_message("macosThreadExecutionFunction queue creation")
 
-        thread = threading.Thread(target=run_in_thread, args=(loop, userDefinedFunction, parameterList, resultQueue))
-        ColorPrinter.print_important_message("macosThreadExecutionFunction thread creation")
-        thread.start()
-        ColorPrinter.print_important_message("macosThreadExecutionFunction thread start")
-        thread.join()
+        future = asyncio.create_task(self.__executeAsyncFunction(userDefinedFunction, parameterList))
+        ColorPrinter.print_important_message("macosThreadExecutionFunction task creation")
+        result = loop.run_until_complete(future)
+        ColorPrinter.print_important_message("macosThreadExecutionFunction get result")
 
         loop.run_until_complete(loop.shutdown_asyncgens())
-        ColorPrinter.print_important_message("macosThreadExecutionFunction loop finish")
         loop.close()
-
-        result = resultQueue.get()
-        ColorPrinter.print_important_data("macosThreadExecutionFunction result", result)
-        if isinstance(result, Exception):
-            raise result
+        ColorPrinter.print_important_message("macosThreadExecutionFunction loop finish")
 
         return result
+
+    # def macosThreadExecutionFunction(self, userDefinedFunction, parameterList):
+    #     def run_in_thread(loop, userDefinedFunction, parameterList, resultQueue):
+    #         ColorPrinter.print_important_message("run_in_thread start")
+    #         asyncio.set_event_loop(loop)
+    #         ColorPrinter.print_important_message("run_in_thread loop creation")
+    #         try:
+    #             future = asyncio.run_coroutine_threadsafe(self.__executeAsyncFunction(userDefinedFunction, parameterList), loop)
+    #             ColorPrinter.print_important_data("run_in_thread run_coroutine_threadsafe", future)
+    #             resultQueue.put(future.result())
+    #             ColorPrinter.print_important_message("finish internal thread")
+    #         except Exception as e:
+    #             resultQueue.put(e)
+    #
+    #     loop = asyncio.new_event_loop()
+    #     ColorPrinter.print_important_message("macosThreadExecutionFunction loop creation")
+    #     resultQueue = Queue()
+    #     ColorPrinter.print_important_message("macosThreadExecutionFunction queue creation")
+    #
+    #     thread = threading.Thread(target=run_in_thread, args=(loop, userDefinedFunction, parameterList, resultQueue))
+    #     ColorPrinter.print_important_message("macosThreadExecutionFunction thread creation")
+    #     thread.start()
+    #     ColorPrinter.print_important_message("macosThreadExecutionFunction thread start")
+    #     thread.join()
+    #
+    #     loop.run_until_complete(loop.shutdown_asyncgens())
+    #     ColorPrinter.print_important_message("macosThreadExecutionFunction loop finish")
+    #     loop.close()
+    #
+    #     result = resultQueue.get()
+    #     ColorPrinter.print_important_data("macosThreadExecutionFunction result", result)
+    #     if isinstance(result, Exception):
+    #         raise result
+    #
+    #     return result
 
     def execute(self, requestObject):
         ColorPrinter.print_important_data("CommandExecutor requestObject -> protocolNumber", requestObject.getProtocolNumber())
