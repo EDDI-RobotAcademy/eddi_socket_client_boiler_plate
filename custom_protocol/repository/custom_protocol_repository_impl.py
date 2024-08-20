@@ -1,5 +1,6 @@
 import asyncio
 import concurrent
+import threading
 from queue import Queue
 
 from custom_protocol.entity.custom_protocol import CustomProtocolNumber
@@ -87,16 +88,29 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
         return result
 
     def macosThreadExecutionFunction(self, userDefinedFunction, parameterList):
-        result_queue = Queue()
+        def run_in_thread(loop, userDefinedFunction, parameterList, resultQueue):
+            asyncio.set_event_loop(loop)
+            try:
+                future = asyncio.run_coroutine_threadsafe(self.__executeAsyncFunction(userDefinedFunction, parameterList), loop)
+                resultQueue.put(future.result())
+            except Exception as e:
+                resultQueue.put(e)
 
-        def run_in_main_loop():
-            loop = asyncio.get_event_loop()
-            future = asyncio.run_coroutine_threadsafe(self.__executeAsyncFunction(userDefinedFunction, parameterList), loop)
-            result_queue.put(future.result())
+        loop = asyncio.new_event_loop()
+        resultQueue = Queue()
 
-        asyncio.run_coroutine_threadsafe(run_in_main_loop(), asyncio.get_event_loop())
+        thread = threading.Thread(target=run_in_thread, args=(loop, userDefinedFunction, parameterList, result_queue))
+        thread.start()
+        thread.join()
 
-        return result_queue.get()
+        loop.run_until_complete(loop.shutdown_asyncgens())
+        loop.close()
+
+        result = resultQueue.get()
+        if isinstance(result, Exception):
+            raise result
+
+        return result
 
     def execute(self, requestObject):
         ColorPrinter.print_important_data("CommandExecutor requestObject -> protocolNumber", requestObject.getProtocolNumber())
