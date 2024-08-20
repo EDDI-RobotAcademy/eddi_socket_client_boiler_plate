@@ -87,21 +87,47 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
 
         return result
 
-    def macosThreadExecutionFunction(self, userDefinedFunction, parameterList):
+    def execute_in_thread(self, userDefinedFunction, parameterList, result_queue):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        ColorPrinter.print_important_message("macosThreadExecutionFunction loop creation")
+        try:
+            result = loop.run_until_complete(self.__executeAsyncFunction(userDefinedFunction, parameterList))
+            result_queue.put(result)
+        except Exception as e:
+            result_queue.put(e)
+        finally:
+            loop.run_until_complete(loop.shutdown_asyncgens())
+            loop.close()
 
-        future = loop.create_task(self.__executeAsyncFunction(userDefinedFunction, parameterList))
-        ColorPrinter.print_important_message("macosThreadExecutionFunction task creation")
-        result = loop.run_until_complete(future)
-        ColorPrinter.print_important_message("macosThreadExecutionFunction get result")
+    def macosThreadExecutionFunction(self, userDefinedFunction, parameterList):
+        result_queue = Queue()
 
-        loop.run_until_complete(loop.shutdown_asyncgens())
-        loop.close()
-        ColorPrinter.print_important_message("macosThreadExecutionFunction loop finish")
+        # 스레드에서 비동기 작업 실행
+        thread = threading.Thread(target=self.execute_in_thread,
+                                  args=(userDefinedFunction, parameterList, result_queue))
+        thread.start()
+        thread.join()
 
+        result = result_queue.get()
+        if isinstance(result, Exception):
+            raise result
         return result
+    
+    # def macosThreadExecutionFunction(self, userDefinedFunction, parameterList):
+    #     loop = asyncio.new_event_loop()
+    #     asyncio.set_event_loop(loop)
+    #     ColorPrinter.print_important_message("macosThreadExecutionFunction loop creation")
+    #
+    #     future = loop.create_task(self.__executeAsyncFunction(userDefinedFunction, parameterList))
+    #     ColorPrinter.print_important_message("macosThreadExecutionFunction task creation")
+    #     result = loop.run_until_complete(future)
+    #     ColorPrinter.print_important_message("macosThreadExecutionFunction get result")
+    #
+    #     loop.run_until_complete(loop.shutdown_asyncgens())
+    #     loop.close()
+    #     ColorPrinter.print_important_message("macosThreadExecutionFunction loop finish")
+    #
+    #     return result
 
     # def macosThreadExecutionFunction(self, userDefinedFunction, parameterList):
     #     def run_in_thread(loop, userDefinedFunction, parameterList, resultQueue):
