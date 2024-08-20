@@ -86,18 +86,19 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
         return result
 
     def macosThreadExecutionFunction(self, userDefinedFunction, parameterList):
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
         try:
-            loop = asyncio.get_event_loop()
-
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-
-        if loop.is_running():
-            future = asyncio.run_coroutine_threadsafe(self.__executeAsyncFunction(userDefinedFunction, parameterList), loop)
+            future = asyncio.run_coroutine_threadsafe(self.__executeAsyncFunction(userDefinedFunction, parameterList),
+                                                      loop)
             result = future.result()
-        else:
-            result = loop.run_until_complete(self.__executeAsyncFunction(userDefinedFunction, parameterList))
+        except Exception as e:
+            print(f"Exception in macosThreadExecutionFunction: {str(e)}")
+            result = None
+        finally:
+            loop.run_until_complete(loop.shutdown_asyncgens())
+            loop.close()
 
         return result
 
