@@ -92,7 +92,7 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
         asyncio.set_event_loop(loop)
         ColorPrinter.print_important_message("macosThreadExecutionFunction loop creation")
 
-        future = asyncio.create_task(self.__executeAsyncFunction(userDefinedFunction, parameterList))
+        future = loop.create_task(self.__executeAsyncFunction(userDefinedFunction, parameterList))
         ColorPrinter.print_important_message("macosThreadExecutionFunction task creation")
         result = loop.run_until_complete(future)
         ColorPrinter.print_important_message("macosThreadExecutionFunction get result")
