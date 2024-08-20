@@ -3,6 +3,8 @@ import concurrent
 
 from custom_protocol.entity.custom_protocol import CustomProtocolNumber
 from custom_protocol.repository.custom_protocol_repository import CustomProtocolRepository
+from os_detector.detect import OperatingSystemDetector
+from os_detector.operating_system import OperatingSystem
 from utility.color_print import ColorPrinter
 
 try:
@@ -16,9 +18,17 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
     __instance = None
     __protocolTable = {}
 
+    __osDependentThreadExecutionTable = {}
+
     def __new__(cls):
         if cls.__instance is None:
             cls.__instance = super().__new__(cls)
+
+            cls.__instance.__osDependentThreadExecutionTable = {
+                OperatingSystem.WINDOWS: cls.__instance.generalThreadExecutionFunction,
+                OperatingSystem.LINUX: cls.__instance.generalThreadExecutionFunction,
+                OperatingSystem.MACOS: cls.__instance.macosThreadExecutionFunction,
+            }
 
         return cls.__instance
 
@@ -59,6 +69,38 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
     async def __executeAsyncFunction(self, userDefinedFunction, parameterList):
         return await userDefinedFunction(*parameterList)
 
+    def generalThreadExecutionFunction(self, userDefinedFunction, parameterList):
+        try:
+            loop = asyncio.get_event_loop()
+
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+        if loop.is_running():
+            future = asyncio.ensure_future(self.__executeAsyncFunction(userDefinedFunction, parameterList))
+            result = asyncio.get_event_loop().run_until_complete(future)
+        else:
+            result = loop.run_until_complete(self.__executeAsyncFunction(userDefinedFunction, parameterList))
+
+        return result
+
+    def macosThreadExecutionFunction(self, userDefinedFunction, parameterList):
+        try:
+            loop = asyncio.get_event_loop()
+
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+        if loop.is_running():
+            future = asyncio.run_coroutine_threadsafe(self.__executeAsyncFunction(userDefinedFunction, parameterList), loop)
+            result = future.result()
+        else:
+            result = loop.run_until_complete(self.__executeAsyncFunction(userDefinedFunction, parameterList))
+
+        return result
+
     def execute(self, requestObject):
         ColorPrinter.print_important_data("CommandExecutor requestObject -> protocolNumber", requestObject.getProtocolNumber())
         ColorPrinter.print_important_data("customFunction", self.__protocolTable[requestObject.getProtocolNumber()])
@@ -68,18 +110,9 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
         parameterList = self.__extractParameterList(requestObject)
 
         if asyncio.iscoroutinefunction(userDefinedFunction):
-            try:
-                loop = asyncio.get_event_loop()
-
-            except RuntimeError:
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-
-            if loop.is_running():
-                future = asyncio.ensure_future(self.__executeAsyncFunction(userDefinedFunction, parameterList))
-                result = asyncio.get_event_loop().run_until_complete(future)
-            else:
-                result = loop.run_until_complete(self.__executeAsyncFunction(userDefinedFunction, parameterList))
+            osType = OperatingSystemDetector.checkCurrentOperatingSystem()
+            osDependentThreadExecuteFunction = self.__osDependentThreadExecutionTable[osType]
+            result = osDependentThreadExecuteFunction(userDefinedFunction, parameterList)
         else:
             result = self.__executeSynchronizeFunction(userDefinedFunction, parameterList)
 
