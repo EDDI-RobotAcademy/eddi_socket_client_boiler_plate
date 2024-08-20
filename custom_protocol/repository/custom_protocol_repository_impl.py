@@ -42,7 +42,7 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
 
         self.__protocolTable[protocolNumber.value] = customFunction
 
-    def __executeSyncronizeFunction(self, userDefinedFunction, parameterList):
+    def __executeSynchronizeFunction(self, userDefinedFunction, parameterList):
         if parameterList:
             return userDefinedFunction(*parameterList)
 
@@ -56,6 +56,9 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
 
         return []
 
+    async def __executeAsyncFunction(self, userDefinedFunction, parameterList):
+        return await userDefinedFunction(*parameterList)
+
     def execute(self, requestObject):
         ColorPrinter.print_important_data("CommandExecutor requestObject -> protocolNumber", requestObject.getProtocolNumber())
         ColorPrinter.print_important_data("customFunction", self.__protocolTable[requestObject.getProtocolNumber()])
@@ -65,11 +68,20 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
         parameterList = self.__extractParameterList(requestObject)
 
         if asyncio.iscoroutinefunction(userDefinedFunction):
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                future = executor.submit(asyncio.run, userDefinedFunction(*parameterList))
-                result = future.result()
+            try:
+                loop = asyncio.get_event_loop()
+
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+
+            if loop.is_running():
+                future = asyncio.ensure_future(self.__executeAsyncFunction(userDefinedFunction, parameterList))
+                result = asyncio.get_event_loop().run_until_complete(future)
+            else:
+                result = loop.run_until_complete(self.__executeAsyncFunction(userDefinedFunction, parameterList))
         else:
-            result = self.__executeSyncronizeFunction(userDefinedFunction, parameterList)
+            result = self.__executeSynchronizeFunction(userDefinedFunction, parameterList)
 
         ColorPrinter.print_important_data("result", result)
 
