@@ -99,20 +99,10 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
             loop.run_until_complete(loop.shutdown_asyncgens())
             loop.close()
 
-    def macosThreadExecutionFunction(self, userDefinedFunction, parameterList):
-        result_queue = Queue()
-
-        # 스레드에서 비동기 작업 실행
-        thread = threading.Thread(target=self.execute_in_thread,
-                                  args=(userDefinedFunction, parameterList, result_queue))
-        thread.start()
-        thread.join()
-
-        result = result_queue.get()
-        if isinstance(result, Exception):
-            raise result
+    async def macosThreadExecutionFunction(self, userDefinedFunction, parameterList):
+        result = await userDefinedFunction(*parameterList)
         return result
-    
+
     # def macosThreadExecutionFunction(self, userDefinedFunction, parameterList):
     #     loop = asyncio.new_event_loop()
     #     asyncio.set_event_loop(loop)
