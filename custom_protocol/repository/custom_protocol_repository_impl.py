@@ -100,7 +100,36 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
             loop.close()
 
     async def macosThreadExecutionFunction(self, userDefinedFunction, parameterList):
-        result = await userDefinedFunction(*parameterList)
+        def threadFunction(loop, resultQueue):
+            asyncio.set_event_loop(loop)
+
+            try:
+                serviceInstance = userDefinedFunction.__self__
+
+                if hasattr(serviceInstance, userDefinedFunction.__name__):
+                    result = loop.run_until_complete(getattr(serviceInstance, userDefinedFunction.__name__)(*parameterList))
+                else:
+                    raise ValueError("함수 구성이 잘못되었음!")
+
+                resultQueue.put(result)
+            except Exception as e:
+                resultQueue.put(e)
+            finally:
+                loop.run_until_complete(loop.shutdown_asyncgens())
+                loop.close()
+
+        resultQueue = Queue()
+        loop = asyncio.new_event_loop()
+
+        thread = threading.Thread(target=threadFunction, args=(loop, resultQueue))
+        thread.start()
+        thread.join()
+
+        result = resultQueue.get()
+        ColorPrinter.print_important_data("macosThreadExecutionFunction result", result)
+        if isinstance(result, Exception):
+            raise result
+
         return result
 
     # def macosThreadExecutionFunction(self, userDefinedFunction, parameterList):
