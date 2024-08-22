@@ -1,5 +1,6 @@
 import asyncio
 import concurrent
+import json
 import os
 import subprocess
 import threading
@@ -154,7 +155,7 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
                 fullPackagePath,
                 className,
                 userDefinedFunctionName,
-                parameterList
+                json.dumps(parameterList)
             ], capture_output=True, text=True)
             ColorPrinter.print_important_data("Rust Task Executor 구동 결과", result)
         except Exception as e:
