@@ -1,5 +1,7 @@
 import asyncio
 import concurrent
+import os
+import subprocess
 import threading
 from queue import Queue
 
@@ -99,82 +101,32 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
             loop.run_until_complete(loop.shutdown_asyncgens())
             loop.close()
 
-    async def macosThreadExecutionFunction(self, userDefinedFunction, parameterList):
-        def threadFunction(loop, resultQueue):
-            asyncio.set_event_loop(loop)
-
-            try:
-                serviceInstance = userDefinedFunction.__self__
-
-                if hasattr(serviceInstance, userDefinedFunction.__name__):
-                    result = loop.run_until_complete(getattr(serviceInstance, userDefinedFunction.__name__)(*parameterList))
-                else:
-                    raise ValueError("함수 구성이 잘못되었음!")
-
-                resultQueue.put(result)
-            except Exception as e:
-                resultQueue.put(e)
-            finally:
-                loop.run_until_complete(loop.shutdown_asyncgens())
-                loop.close()
-
-        resultQueue = Queue()
-        loop = asyncio.new_event_loop()
-
-        thread = threading.Thread(target=threadFunction, args=(loop, resultQueue))
-        thread.start()
-        thread.join()
-
-        result = resultQueue.get()
-        ColorPrinter.print_important_data("macosThreadExecutionFunction result", result)
-        if isinstance(result, Exception):
-            raise result
-
-        return result
-
-    # def macosThreadExecutionFunction(self, userDefinedFunction, parameterList):
-    #     loop = asyncio.new_event_loop()
-    #     asyncio.set_event_loop(loop)
-    #     ColorPrinter.print_important_message("macosThreadExecutionFunction loop creation")
-    #
-    #     future = loop.create_task(self.__executeAsyncFunction(userDefinedFunction, parameterList))
-    #     ColorPrinter.print_important_message("macosThreadExecutionFunction task creation")
-    #     result = loop.run_until_complete(future)
-    #     ColorPrinter.print_important_message("macosThreadExecutionFunction get result")
-    #
-    #     loop.run_until_complete(loop.shutdown_asyncgens())
-    #     loop.close()
-    #     ColorPrinter.print_important_message("macosThreadExecutionFunction loop finish")
-    #
-    #     return result
-
-    # def macosThreadExecutionFunction(self, userDefinedFunction, parameterList):
-    #     def run_in_thread(loop, userDefinedFunction, parameterList, resultQueue):
-    #         ColorPrinter.print_important_message("run_in_thread start")
+    # TODO: 추후 개선이 필요하겠지만 지금은 그냥 Rust 코드로 구동하자 (Mac OS 전용)
+    # async def macosThreadExecutionFunction(self, userDefinedFunction, parameterList):
+    #     def threadFunction(loop, resultQueue):
     #         asyncio.set_event_loop(loop)
-    #         ColorPrinter.print_important_message("run_in_thread loop creation")
+    #
     #         try:
-    #             future = asyncio.run_coroutine_threadsafe(self.__executeAsyncFunction(userDefinedFunction, parameterList), loop)
-    #             ColorPrinter.print_important_data("run_in_thread run_coroutine_threadsafe", future)
-    #             resultQueue.put(future.result())
-    #             ColorPrinter.print_important_message("finish internal thread")
+    #             serviceInstance = userDefinedFunction.__self__
+    #
+    #             if hasattr(serviceInstance, userDefinedFunction.__name__):
+    #                 result = loop.run_until_complete(getattr(serviceInstance, userDefinedFunction.__name__)(*parameterList))
+    #             else:
+    #                 raise ValueError("함수 구성이 잘못되었음!")
+    #
+    #             resultQueue.put(result)
     #         except Exception as e:
     #             resultQueue.put(e)
+    #         finally:
+    #             loop.run_until_complete(loop.shutdown_asyncgens())
+    #             loop.close()
     #
-    #     loop = asyncio.new_event_loop()
-    #     ColorPrinter.print_important_message("macosThreadExecutionFunction loop creation")
     #     resultQueue = Queue()
-    #     ColorPrinter.print_important_message("macosThreadExecutionFunction queue creation")
+    #     loop = asyncio.new_event_loop()
     #
-    #     thread = threading.Thread(target=run_in_thread, args=(loop, userDefinedFunction, parameterList, resultQueue))
-    #     ColorPrinter.print_important_message("macosThreadExecutionFunction thread creation")
+    #     thread = threading.Thread(target=threadFunction, args=(loop, resultQueue))
     #     thread.start()
-    #     ColorPrinter.print_important_message("macosThreadExecutionFunction thread start")
     #     thread.join()
-    #
-    #     loop.run_until_complete(loop.shutdown_asyncgens())
-    #     ColorPrinter.print_important_message("macosThreadExecutionFunction loop finish")
-    #     loop.close()
     #
     #     result = resultQueue.get()
     #     ColorPrinter.print_important_data("macosThreadExecutionFunction result", result)
@@ -182,6 +134,33 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
     #         raise result
     #
     #     return result
+
+    def macosThreadExecutionFunction(self, userDefinedFunction, parameterList):
+        # Mac OS에서 Project Top으로 잡힘
+        currentWorkDirectory = os.getcwd()
+
+        rustBinaryRelativePath = "task_executor/target/release/task_executor"
+        rustBinaryAbsolutePath = os.path.join(currentWorkDirectory, rustBinaryRelativePath)
+
+        fullPackagePath = userDefinedFunction.__module__
+        className = userDefinedFunction.__class__.__name__
+        userDefinedFunctionName = userDefinedFunction.__name__
+
+        result = None
+
+        try:
+            result = subprocess.run([
+                rustBinaryAbsolutePath,
+                fullPackagePath,
+                className,
+                userDefinedFunctionName,
+                parameterList
+            ], capture_output=True, text=True)
+            ColorPrinter.print_important_data("Rust Task Executor 구동 결과", result)
+        except Exception as e:
+            ColorPrinter.print_important_data("바이너리 구동에 실패! (바이너리를 생성하세요)", str(e))
+
+        return result
 
     def execute(self, requestObject):
         ColorPrinter.print_important_data("CommandExecutor requestObject -> protocolNumber", requestObject.getProtocolNumber())
