@@ -6,6 +6,8 @@ import subprocess
 import threading
 from queue import Queue
 
+import mmap
+
 from custom_protocol.entity.custom_protocol import CustomProtocolNumber
 from custom_protocol.repository.custom_protocol_repository import CustomProtocolRepository
 from os_detector.detect import OperatingSystemDetector
@@ -148,6 +150,11 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
         className = userDefinedFunction.__class__.__name__
         userDefinedFunctionName = userDefinedFunction.__name__
 
+        ColorPrinter.print_important_data("fullPackagePath", fullPackagePath)
+        ColorPrinter.print_important_data("basePackagePath", basePackagePath)
+        ColorPrinter.print_important_data("className", className)
+        ColorPrinter.print_important_data("userDefinedFunctionName", userDefinedFunctionName)
+
         result = None
 
         try:
@@ -160,10 +167,27 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
                 json.dumps(parameterList)
             ], capture_output=True, text=True)
             ColorPrinter.print_important_data("Rust Task Executor 구동 결과", result)
+
+            message = self.read_from_shared_memory()
+            ColorPrinter.print_important_data("Shared Memory Message", message)
         except Exception as e:
             ColorPrinter.print_important_data("바이너리 구동에 실패! (바이너리를 생성하세요)", str(e))
 
         return result
+
+    def read_from_shared_memory(self):
+        # Rust에서 사용한 공유 메모리 ID와 동일해야 합니다.
+        shm_key = "rust_shared_memory"
+        shm_size = 4096  # Rust에서 설정한 공유 메모리의 크기와 동일해야 합니다.
+
+        # 공유 메모리 열기
+        with open(f"/dev/shm/{shm_key}", "r+b") as f:
+            # mmap을 통해 공유 메모리 매핑
+            mm = mmap.mmap(f.fileno(), shm_size, access=mmap.ACCESS_READ)
+            # 공유 메모리에서 데이터를 읽어들임
+            data = mm[:shm_size].decode('utf-8').rstrip('\x00')  # '\x00' 패딩 제거
+            mm.close()
+        return data
 
     def execute(self, requestObject):
         ColorPrinter.print_important_data("CommandExecutor requestObject -> protocolNumber", requestObject.getProtocolNumber())
@@ -177,7 +201,7 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
         # 무조건 코루틴 태우도록 구성해야함
         # 우선은 Custom Function은 무조건 async 붙이도록 하자
         if asyncio.iscoroutinefunction(userDefinedFunction):
-            ColorPrinter.print_important_message("Non-Coroutine Start")
+            ColorPrinter.print_important_message("Coroutine Start")
             osType = OperatingSystemDetector.checkCurrentOperatingSystem()
             osDependentThreadExecuteFunction = self.__osDependentThreadExecutionTable[osType]
             result = osDependentThreadExecuteFunction(userDefinedFunction, parameterList)
