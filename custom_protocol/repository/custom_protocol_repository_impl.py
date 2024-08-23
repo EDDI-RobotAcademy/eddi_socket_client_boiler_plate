@@ -173,12 +173,18 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
 
         parameterList = self.__extractParameterList(requestObject)
 
+        # TODO: 실제로는 의존성 분석을 해서 내부에 async 쓰는게 있으면
+        # 무조건 코루틴 태우도록 구성해야함
+        # 우선은 Custom Function은 무조건 async 붙이도록 하자
         if asyncio.iscoroutinefunction(userDefinedFunction):
+            ColorPrinter.print_important_message("Non-Coroutine Start")
             osType = OperatingSystemDetector.checkCurrentOperatingSystem()
             osDependentThreadExecuteFunction = self.__osDependentThreadExecutionTable[osType]
             result = osDependentThreadExecuteFunction(userDefinedFunction, parameterList)
         else:
+            ColorPrinter.print_important_message("Non-Coroutine Start")
             result = self.__executeSynchronizeFunction(userDefinedFunction, parameterList)
+            ColorPrinter.print_important_message("User Defined Protocol 함수는 반드시 async로 구성해야합니다")
 
         ColorPrinter.print_important_data("result", result)
 
