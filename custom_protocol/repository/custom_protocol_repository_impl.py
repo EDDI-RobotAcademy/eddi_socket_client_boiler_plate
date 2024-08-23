@@ -147,7 +147,7 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
 
         fullPackagePath = userDefinedFunction.__module__
         basePackagePath = fullPackagePath.split(".")[0]
-        className = userDefinedFunction.__class__.__name__
+        className = userDefinedFunction.__self__.__class__.__name__
         userDefinedFunctionName = userDefinedFunction.__name__
 
         ColorPrinter.print_important_data("fullPackagePath", fullPackagePath)
