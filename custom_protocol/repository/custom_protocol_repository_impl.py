@@ -31,7 +31,7 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
 
             cls.__instance.__osDependentThreadExecutionTable = {
                 OperatingSystem.WINDOWS: cls.__instance.generalThreadExecutionFunction,
-                OperatingSystem.LINUX: cls.__instance.generalThreadExecutionFunction,
+                OperatingSystem.LINUX: cls.__instance.macosThreadExecutionFunction,
                 OperatingSystem.MACOS: cls.__instance.macosThreadExecutionFunction,
             }
 
@@ -144,6 +144,7 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
         rustBinaryAbsolutePath = os.path.join(currentWorkDirectory, rustBinaryRelativePath)
 
         fullPackagePath = userDefinedFunction.__module__
+        basePackagePath = fullPackagePath.split(".")[0]
         className = userDefinedFunction.__class__.__name__
         userDefinedFunctionName = userDefinedFunction.__name__
 
@@ -153,6 +154,7 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
             result = subprocess.run([
                 rustBinaryAbsolutePath,
                 fullPackagePath,
+                basePackagePath,
                 className,
                 userDefinedFunctionName,
                 json.dumps(parameterList)
