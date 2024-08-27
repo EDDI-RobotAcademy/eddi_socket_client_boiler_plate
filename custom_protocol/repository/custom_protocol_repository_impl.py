@@ -33,7 +33,7 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
 
             cls.__instance.__osDependentThreadExecutionTable = {
                 OperatingSystem.WINDOWS: cls.__instance.generalThreadExecutionFunction,
-                OperatingSystem.LINUX: cls.__instance.macosThreadExecutionFunction,
+                OperatingSystem.LINUX: cls.__instance.generalThreadExecutionFunction,
                 OperatingSystem.MACOS: cls.__instance.macosThreadExecutionFunction,
             }
 
