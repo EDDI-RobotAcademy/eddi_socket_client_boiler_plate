@@ -2,6 +2,7 @@ import asyncio
 import concurrent
 import json
 import os
+import signal
 import subprocess
 import threading
 from multiprocessing import shared_memory
@@ -159,19 +160,32 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
         executedMessage = None
 
         try:
-            result = subprocess.run([
+            # rustProcess = subprocess.run([
+            #     rustBinaryAbsolutePath,
+            #     fullPackagePath,
+            #     basePackagePath,
+            #     className,
+            #     userDefinedFunctionName,
+            #     json.dumps(parameterList)
+            # ], capture_output=True, text=True)
+            rustProcess = subprocess.Popen([
                 rustBinaryAbsolutePath,
                 fullPackagePath,
                 basePackagePath,
                 className,
                 userDefinedFunctionName,
                 json.dumps(parameterList)
-            ], capture_output=True, text=True)
-            ColorPrinter.print_important_data("Rust Task Executor 구동 결과", result)
+            ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            ColorPrinter.print_important_data("Rust Task Executor 구동 결과", rustProcess)
 
             message = self.read_from_shared_memory()
             ColorPrinter.print_important_data("Shared Memory Message", message)
+
+            os.kill(rustProcess.pid, signal.SIGTERM)
             executedMessage = {"result": message}
+
+            rustProcess.wait()
+
         except Exception as e:
             ColorPrinter.print_important_data("바이너리 구동에 실패! (바이너리를 생성하세요)", str(e))
 
