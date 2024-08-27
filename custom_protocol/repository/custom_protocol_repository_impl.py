@@ -157,34 +157,34 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
         ColorPrinter.print_important_data("className", className)
         ColorPrinter.print_important_data("userDefinedFunctionName", userDefinedFunctionName)
 
+        sharedMemorySize = 4096
+        sharedMemory = shared_memory.SharedMemory(create=True, size=sharedMemorySize, name="rust_shared_memory")
+
         executedMessage = None
 
         try:
-            # rustProcess = subprocess.run([
-            #     rustBinaryAbsolutePath,
-            #     fullPackagePath,
-            #     basePackagePath,
-            #     className,
-            #     userDefinedFunctionName,
-            #     json.dumps(parameterList)
-            # ], capture_output=True, text=True)
-            rustProcess = subprocess.Popen([
+            rustProcess = subprocess.run([
                 rustBinaryAbsolutePath,
                 fullPackagePath,
                 basePackagePath,
                 className,
                 userDefinedFunctionName,
                 json.dumps(parameterList)
-            ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            ], capture_output=True, text=True)
+            # rustProcess = subprocess.Popen([
+            #     rustBinaryAbsolutePath,
+            #     fullPackagePath,
+            #     basePackagePath,
+            #     className,
+            #     userDefinedFunctionName,
+            #     json.dumps(parameterList)
+            # ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             ColorPrinter.print_important_data("Rust Task Executor 구동 결과", rustProcess)
 
-            message = self.read_from_shared_memory()
+            message = self.read_from_shared_memory(sharedMemory, sharedMemorySize)
             ColorPrinter.print_important_data("Shared Memory Message", message)
 
-            os.kill(rustProcess.pid, signal.SIGTERM)
             executedMessage = {"result": message}
-
-            rustProcess.wait()
 
         except Exception as e:
             ColorPrinter.print_important_data("바이너리 구동에 실패! (바이너리를 생성하세요)", str(e))
@@ -205,16 +205,18 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
     #         mm.close()
     #     return data
 
-    def read_from_shared_memory(self):
-        shm_key = "rust_shared_memory"
-        shm_size = 4096
+    def read_from_shared_memory(self, sharedMemory, sharedMemorySize):
+        # shm_key = "rust_shared_memory"
+        # shm_size = 4096
 
         try:
             # Open the shared memory
-            existing_shm = shared_memory.SharedMemory(name=shm_key)
+            # existing_shm = shared_memory.SharedMemory(name=shm_key)
             # Read from the shared memory
-            data = bytes(existing_shm.buf[:shm_size]).decode('utf-8').rstrip('\x00')
-            existing_shm.close()
+            data = bytes(sharedMemory.buf[:sharedMemorySize]).decode('utf-8').rstrip('\x00')
+            sharedMemory.close()
+            sharedMemory.unlink()
+
         except FileNotFoundError:
             return "Shared memory segment not found."
         except Exception as e:
