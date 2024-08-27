@@ -4,6 +4,7 @@ import json
 import os
 import subprocess
 import threading
+from multiprocessing import shared_memory
 from queue import Queue
 
 import mmap
@@ -55,7 +56,7 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
                 (UserDefinedProtocolNumber is not None and UserDefinedProtocolNumber.hasValue(protocolNumber.value))):
             raise ValueError("프로토콜을 등록 시 반드시 CustomProtocolNumber 혹은 UserDefinedProtocolNumber에 정의된 값을 사용하세요")
         if not callable(customFunction):
-            raise  ValueError("customFunction은 프로토콜에 대응하는 함수입니다")
+            raise ValueError("customFunction은 프로토콜에 대응하는 함수입니다")
 
         self.__protocolTable[protocolNumber.value] = customFunction
 
@@ -155,7 +156,7 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
         ColorPrinter.print_important_data("className", className)
         ColorPrinter.print_important_data("userDefinedFunctionName", userDefinedFunctionName)
 
-        result = None
+        executedMessage = None
 
         try:
             result = subprocess.run([
@@ -170,27 +171,46 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
 
             message = self.read_from_shared_memory()
             ColorPrinter.print_important_data("Shared Memory Message", message)
+            executedMessage = {"result": message}
         except Exception as e:
             ColorPrinter.print_important_data("바이너리 구동에 실패! (바이너리를 생성하세요)", str(e))
 
-        return result
+        return executedMessage
+
+    # def read_from_shared_memory(self):
+    #     # Rust에서 사용한 공유 메모리 ID와 동일해야 합니다.
+    #     shm_key = "rust_shared_memory"
+    #     shm_size = 4096  # Rust에서 설정한 공유 메모리의 크기와 동일해야 합니다.
+    #
+    #     # 공유 메모리 열기
+    #     with open(f"/dev/shm/{shm_key}", "r+b") as f:
+    #         # mmap을 통해 공유 메모리 매핑
+    #         mm = mmap.mmap(f.fileno(), shm_size, access=mmap.ACCESS_READ)
+    #         # 공유 메모리에서 데이터를 읽어들임
+    #         data = mm[:shm_size].decode('utf-8').rstrip('\x00')  # '\x00' 패딩 제거
+    #         mm.close()
+    #     return data
 
     def read_from_shared_memory(self):
-        # Rust에서 사용한 공유 메모리 ID와 동일해야 합니다.
         shm_key = "rust_shared_memory"
-        shm_size = 4096  # Rust에서 설정한 공유 메모리의 크기와 동일해야 합니다.
+        shm_size = 4096
 
-        # 공유 메모리 열기
-        with open(f"/dev/shm/{shm_key}", "r+b") as f:
-            # mmap을 통해 공유 메모리 매핑
-            mm = mmap.mmap(f.fileno(), shm_size, access=mmap.ACCESS_READ)
-            # 공유 메모리에서 데이터를 읽어들임
-            data = mm[:shm_size].decode('utf-8').rstrip('\x00')  # '\x00' 패딩 제거
-            mm.close()
+        try:
+            # Open the shared memory
+            existing_shm = shared_memory.SharedMemory(name=shm_key)
+            # Read from the shared memory
+            data = bytes(existing_shm.buf[:shm_size]).decode('utf-8').rstrip('\x00')
+            existing_shm.close()
+        except FileNotFoundError:
+            return "Shared memory segment not found."
+        except Exception as e:
+            return f"Error accessing shared memory: {e}"
+
         return data
 
     def execute(self, requestObject):
-        ColorPrinter.print_important_data("CommandExecutor requestObject -> protocolNumber", requestObject.getProtocolNumber())
+        ColorPrinter.print_important_data("CommandExecutor requestObject -> protocolNumber",
+                                          requestObject.getProtocolNumber())
         ColorPrinter.print_important_data("customFunction", self.__protocolTable[requestObject.getProtocolNumber()])
 
         userDefinedFunction = self.__protocolTable[requestObject.getProtocolNumber()]
@@ -213,4 +233,3 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
         ColorPrinter.print_important_data("result", result)
 
         return result
-    
