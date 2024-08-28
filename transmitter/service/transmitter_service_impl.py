@@ -5,6 +5,7 @@ from time import sleep
 
 from critical_section.manager import CriticalSectionManager
 from response_generator.generator import ResponseGenerator
+from response_generator.packet_length_response import PacketLengthResponse
 from transmitter.repository.transmitter_repository_impl import TransmitterRepositoryImpl
 from transmitter.service.transmitter_service import TransmitterService
 from utility.color_print import ColorPrinter
@@ -83,8 +84,21 @@ class TransmitterServiceImpl(TransmitterService):
 
                 dictionarizedResponse = socketResponse.toDictionary()
                 serializedRequestData = json.dumps(dictionarizedResponse, ensure_ascii=False)
+                
+                # TODO: 전체 패킷 길이를 계산해야함
+                # 계산하여 수신측이 지속적으로 정보를 수신할 수 있도록 만들어야함
+                packetLength = len(serializedRequestData)
+                ColorPrinter.print_important_data("전체 패킷 길이", packetLength)
+
+                # 일관성 유지를 위해 PacketLengthResponse를 구성하도록 만든다.
+                packetLengthResponse = PacketLengthResponse(packetLength)
+                dictionarizedPacketLengthResponse = packetLengthResponse.toDictionary()
+                serializedPacketLengthData = json.dumps(dictionarizedPacketLengthResponse, ensure_ascii=False)
 
                 with self.__transmitterLock:
+                    # 전체 패킷 길이 전송
+                    self.__transmitterRepository.transmit(clientSocketObject, serializedPacketLengthData)
+                    # 실제 내용물 전송
                     self.__transmitterRepository.transmit(clientSocketObject, serializedRequestData)
 
             except (socket.error, BrokenPipeError) as exception:
