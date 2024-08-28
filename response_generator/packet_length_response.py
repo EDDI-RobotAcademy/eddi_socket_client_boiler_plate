@@ -9,10 +9,14 @@ class PacketLengthResponse:
     def getPacketDataLength(self):
         return self.packetDataLength
 
-    def toDictionary(self):
+    def toFixedSizeDictionary(self):
+        # protocolNumber와 packetDataLength를 고정 크기로 변환
+        protocolNumberString = str(self.protocolNumber).ljust(4)
+        packetDataLengthString = str(self.packetDataLength).ljust(8)
+
         return {
-            "protocolNumber": self.protocolNumber,
-            "packetDataLength": self.packetDataLength
+            "protocolNumber": protocolNumberString,
+            "packetDataLength": packetDataLengthString
         }
 
     def __str__(self):
