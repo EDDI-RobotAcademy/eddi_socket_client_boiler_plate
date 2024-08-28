@@ -13,6 +13,8 @@ class CustomProtocolNumber(Enum):
 
     N_PARAMETERS_GATHERING_OUTPUT = 21
 
+    DATA_LENGTH = 7777
+
     @classmethod
     def hasValue(cls, value):
         return any(value == item.value for item in cls)

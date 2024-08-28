@@ -5,6 +5,7 @@ from time import sleep
 
 from critical_section.manager import CriticalSectionManager
 from response_generator.generator import ResponseGenerator
+from response_generator.packet_length_response import PacketLengthResponse
 from transmitter.repository.transmitter_repository_impl import TransmitterRepositoryImpl
 from transmitter.service.transmitter_service import TransmitterService
 from utility.color_print import ColorPrinter
@@ -50,6 +51,20 @@ class TransmitterServiceImpl(TransmitterService):
     #
     #     return False
 
+    # def __sendFixedLengthHeader(self, clientSocketObject, protocolNumber, data):
+    #     # 데이터 직렬화
+    #     serialized_data = json.dumps(data, ensure_ascii=False)
+    #     data_length = len(serialized_data)
+    #
+    #     # 고정된 크기의 헤더 생성 (16바이트: 8바이트 프로토콜 번호 + 8바이트 데이터 길이)
+    #     protocolNumber_str = str(protocolNumber).ljust(8)  # 8바이트로 맞추기
+    #     packetDataLength_str = str(data_length).ljust(8)  # 8바이트로 맞추기
+    #     header = f"{protocolNumber_str}{packetDataLength_str}".encode('utf-8')  # 헤더 생성
+    #
+    #     # 헤더와 데이터 전송
+    #     with threading.Lock():  # 동기화
+    #         clientSocketObject.sendall(header + serialized_data.encode('utf-8'))
+
     def __blockToAcquireSocket(self):
         if self.__criticalSectionManager.getClientSocket() is None:
             return True
@@ -83,8 +98,23 @@ class TransmitterServiceImpl(TransmitterService):
 
                 dictionarizedResponse = socketResponse.toDictionary()
                 serializedRequestData = json.dumps(dictionarizedResponse, ensure_ascii=False)
+                
+                # TODO: 전체 패킷 길이를 계산해야함
+                # 계산하여 수신측이 지속적으로 정보를 수신할 수 있도록 만들어야함
+                packetLength = len(serializedRequestData)
+                # ColorPrinter.print_important_data("전체 패킷 길이", packetLength)
+
+                # 일관성 유지를 위해 PacketLengthResponse를 구성하도록 만든다.
+                packetLengthResponse = PacketLengthResponse(packetLength)
+                dictionarizedPacketLengthResponse = packetLengthResponse.toFixedSizeDictionary()
+                serializedPacketLengthData = json.dumps(dictionarizedPacketLengthResponse, ensure_ascii=False)
+                ColorPrinter.print_important_data("패킷 길이 응답", serializedPacketLengthData)
+                ColorPrinter.print_important_data("패킷 길이 객체의 길이", len(serializedPacketLengthData))
 
                 with self.__transmitterLock:
+                    # 전체 패킷 길이 전송
+                    self.__transmitterRepository.transmit(clientSocketObject, serializedPacketLengthData)
+                    # 실제 내용물 전송
                     self.__transmitterRepository.transmit(clientSocketObject, serializedRequestData)
 
             except (socket.error, BrokenPipeError) as exception:
