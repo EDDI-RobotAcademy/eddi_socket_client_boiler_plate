@@ -98,16 +98,19 @@ class TransmitterServiceImpl(TransmitterService):
 
                 dictionarizedResponse = socketResponse.toDictionary()
                 serializedRequestData = json.dumps(dictionarizedResponse, ensure_ascii=False)
-                
+                utf8EncodedRequestData = serializedRequestData.encode("utf-8")
+
                 # TODO: 전체 패킷 길이를 계산해야함
                 # 계산하여 수신측이 지속적으로 정보를 수신할 수 있도록 만들어야함
-                packetLength = len(serializedRequestData)
+                # 길이 계산이 잘못되고 있음
+                packetLength = len(utf8EncodedRequestData)
                 # ColorPrinter.print_important_data("전체 패킷 길이", packetLength)
 
                 # 일관성 유지를 위해 PacketLengthResponse를 구성하도록 만든다.
                 packetLengthResponse = PacketLengthResponse(packetLength)
                 dictionarizedPacketLengthResponse = packetLengthResponse.toFixedSizeDictionary()
                 serializedPacketLengthData = json.dumps(dictionarizedPacketLengthResponse, ensure_ascii=False)
+                ColorPrinter.print_important_data("utf8EncodedRequestData", utf8EncodedRequestData)
                 ColorPrinter.print_important_data("패킷 길이 응답", serializedPacketLengthData)
                 ColorPrinter.print_important_data("패킷 길이 객체의 길이", len(serializedPacketLengthData))
 
