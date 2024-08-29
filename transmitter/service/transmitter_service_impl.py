@@ -65,6 +65,18 @@ class TransmitterServiceImpl(TransmitterService):
     #     with threading.Lock():  # 동기화
     #         clientSocketObject.sendall(header + serialized_data.encode('utf-8'))
 
+    def __transmitInChunks(self, clientSocketObject, data, chunkSize=4096):
+        total_length = len(data)
+        sent_length = 0
+
+        while sent_length < total_length:
+            chunk = data[sent_length:sent_length + chunkSize]
+            clientSocketObject.sendall(chunk.encode('utf-8'))
+            sent_length += len(chunk)
+            ColorPrinter.print_important_data("송신한 청크 길이", len(chunk))
+
+        ColorPrinter.print_important_message("모든 청크 전송 완료")
+
     def __blockToAcquireSocket(self):
         if self.__criticalSectionManager.getClientSocket() is None:
             return True
@@ -115,7 +127,8 @@ class TransmitterServiceImpl(TransmitterService):
                     # 전체 패킷 길이 전송
                     self.__transmitterRepository.transmit(clientSocketObject, serializedPacketLengthData)
                     # 실제 내용물 전송
-                    self.__transmitterRepository.transmit(clientSocketObject, serializedRequestData)
+                    # self.__transmitterRepository.transmit(clientSocketObject, serializedRequestData)
+                    self.__transmitInChunks(clientSocketObject, serializedRequestData)
 
             except (socket.error, BrokenPipeError) as exception:
                 return None
