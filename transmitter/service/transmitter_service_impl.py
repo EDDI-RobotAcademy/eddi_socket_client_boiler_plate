@@ -75,6 +75,8 @@ class TransmitterServiceImpl(TransmitterService):
             sent_length += len(chunk)
             ColorPrinter.print_important_data("송신한 청크 길이", len(chunk))
 
+            sleep(0.1)
+
         ColorPrinter.print_important_message("모든 청크 전송 완료")
 
     def __blockToAcquireSocket(self):
@@ -96,7 +98,7 @@ class TransmitterServiceImpl(TransmitterService):
         while True:
             try:
                 willBeTransmitResponse = self.__transmitterRepository.acquireWillBeTransmit()
-                ColorPrinter.print_important_data("Transmitter -> 전송할 데이터", willBeTransmitResponse)
+                # ColorPrinter.print_important_data("Transmitter -> 전송할 데이터", willBeTransmitResponse)
 
                 protocolNumber, response = willBeTransmitResponse
                 socketResponse = self.__responseGeneratorInstance.generate(protocolNumber, response)
@@ -122,7 +124,7 @@ class TransmitterServiceImpl(TransmitterService):
                 packetLengthResponse = PacketLengthResponse(packetLength)
                 dictionarizedPacketLengthResponse = packetLengthResponse.toFixedSizeDictionary()
                 serializedPacketLengthData = json.dumps(dictionarizedPacketLengthResponse, ensure_ascii=False)
-                ColorPrinter.print_important_data("utf8EncodedRequestData", utf8EncodedRequestData)
+                # ColorPrinter.print_important_data("utf8EncodedRequestData", utf8EncodedRequestData)
                 ColorPrinter.print_important_data("패킷 길이 응답", serializedPacketLengthData)
                 ColorPrinter.print_important_data("패킷 길이 객체의 길이", len(serializedPacketLengthData))
 
