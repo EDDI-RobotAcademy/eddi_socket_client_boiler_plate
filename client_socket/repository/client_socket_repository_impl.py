@@ -32,6 +32,7 @@ class ClientSocketRepositoryImpl(ClientSocketRepository):
         sslContext = SslTlsContextManager.getSSLContext()
 
         clientSocketObject = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        clientSocketObject.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
         self.__setNonBlocking(clientSocketObject)
 
         self.__clientSocket = ClientSocket(config('TARGET_HOST'), int(config('TARGET_PORT')), clientSocketObject)
