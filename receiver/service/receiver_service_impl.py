@@ -56,6 +56,21 @@ class ReceiverServiceImpl(ReceiverService):
     def requestToInjectReceiverAnalyzerChannel(self, ipcReceiverAnalyzerChannel):
         self.__receiverRepository.injectReceiverAnalyzerChannel(ipcReceiverAnalyzerChannel)
 
+    def __recvFixedLength(self, clientSocketObject, length):
+        data = b''
+        remaining = length
+
+        while remaining > 0:
+            try:
+                chunk = clientSocketObject.recv(remaining)
+                if not chunk:
+                    raise ConnectionError("Socket connection lost")
+                data += chunk
+                remaining -= len(chunk)
+            except ssl.SSLWantReadError:
+                continue
+        return data
+
     def __blockToAcquireSocket(self):
         if self.__criticalSectionManager.getClientSocket() is None:
             return True
@@ -80,7 +95,16 @@ class ReceiverServiceImpl(ReceiverService):
                     if not readyToRead:
                         continue
 
-                    receivedData = self.__receiverRepository.receive(clientSocketObject)
+                    headerData = self.__recvFixedLength(clientSocketObject, 58)
+                    ColorPrinter.print_important_data("headerData", headerData)
+
+                    parsedHeaderData = json.loads(headerData)
+                    protocolNumber = int(parsedHeaderData.get("protocolNumber"))
+                    packetDataLength = int(parsedHeaderData.get("packetDataLength").strip())
+                    ColorPrinter.print_important_data("protocolNumber", protocolNumber)
+                    ColorPrinter.print_important_data("packetDataLength", packetDataLength)
+
+                    receivedData = self.__recvFixedLength(clientSocketObject, packetDataLength)
 
                 if not receivedData:
                     ColorPrinter.print_important_message("빈 데이터 수신, 연결을 종료합니다.")
