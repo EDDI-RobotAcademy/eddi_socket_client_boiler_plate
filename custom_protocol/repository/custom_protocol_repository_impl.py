@@ -157,8 +157,11 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
         ColorPrinter.print_important_data("className", className)
         ColorPrinter.print_important_data("userDefinedFunctionName", userDefinedFunctionName)
 
-        sharedMemorySize = 4096
-        sharedMemory = shared_memory.SharedMemory(create=True, size=sharedMemorySize, name="rust_shared_memory")
+        # TODO: Mac OS에서 응답하는 결과가 4096이 넘어갈 경우 이슈가 발생함
+        # 그로 인해 동작에 문제가 발생하므로 처리 결과를 어쩔 수 없이 I/O 구성을 사용하도록 만든다.
+        # 추후 이 부분은 비동기 소켓 서버처럼 4096을 쓰고 읽고 다시 쓰고 읽고 전부 다 쓰면 프로그램이 종료되도록 재구성 할 필요가 있다.
+        # sharedMemorySize = 4096
+        # sharedMemory = shared_memory.SharedMemory(create=True, size=sharedMemorySize, name="rust_shared_memory")
 
         executedMessage = None
 
@@ -181,7 +184,11 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
             # ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             ColorPrinter.print_important_data("Rust Task Executor 구동 결과", rustProcess)
 
-            message = self.read_from_shared_memory(sharedMemory, sharedMemorySize)
+            # TODO: 향후 Chunk 단위 비동기 Shared Memory 송수신 처리가 완료 되면 활성화
+            # message = self.read_from_shared_memory(sharedMemory, sharedMemorySize)
+            # ColorPrinter.print_important_data("Shared Memory Message", message)
+
+            message = self.readRustTaskResult(currentWorkDirectory)
             ColorPrinter.print_important_data("Shared Memory Message", message)
 
             executedMessage = {"result": message}
@@ -190,6 +197,16 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
             ColorPrinter.print_important_data("바이너리 구동에 실패! (바이너리를 생성하세요)", str(e))
 
         return executedMessage
+
+    def readRustTaskResult(self, currentWorkDirectory):
+        rustResultFilePath = os.path.join(currentWorkDirectory, "shared_data.txt")
+
+        try:
+            with open(rustResultFilePath, "rb") as file:
+                data = file.read()
+                return data
+        except FileNotFoundError as e:
+            ColorPrinter.print_important_data("File Not found", str(e))
 
     # def read_from_shared_memory(self):
     #     # Rust에서 사용한 공유 메모리 ID와 동일해야 합니다.
