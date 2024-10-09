@@ -43,7 +43,7 @@ if __name__ == "__main__":
     commandAnalyzerService = CommandAnalyzerServiceImpl.getInstance()
     commandExecutorService = CommandExecutorServiceImpl.getInstance()
 
-    threadWorkerService = ThreadWorkerServiceImpl.getInstance()
+    threadWorkerService = ThreadWorkerServiceImpl.getInstance(8)
     threadWorkerService.createThreadWorker("Receiver", receiverService.requestToReceiveCommand)
     threadWorkerService.executeThreadWorker("Receiver")
 
