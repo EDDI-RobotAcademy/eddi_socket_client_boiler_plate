@@ -11,5 +11,5 @@ class TransmitterService(ABC):
         pass
 
     @abstractmethod
-    def requestToTransmitResult(self):
+    def requestToTransmitResult(self, transmitterId):
         pass

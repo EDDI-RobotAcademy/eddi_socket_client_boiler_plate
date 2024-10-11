@@ -11,5 +11,5 @@ class CommandAnalyzerService(ABC):
         pass
 
     @abstractmethod
-    def analysisCommand(self):
+    def analysisCommand(self, analyzerId):
         pass

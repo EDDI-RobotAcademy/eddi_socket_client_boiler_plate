@@ -242,9 +242,9 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
         return data
 
     def execute(self, requestObject):
-        ColorPrinter.print_important_data("CommandExecutor requestObject -> protocolNumber",
-                                          requestObject.getProtocolNumber())
-        ColorPrinter.print_important_data("customFunction", self.__protocolTable[requestObject.getProtocolNumber()])
+        # ColorPrinter.print_important_data("CommandExecutor requestObject -> protocolNumber",
+        #                                   requestObject.getProtocolNumber())
+        # ColorPrinter.print_important_data("customFunction", self.__protocolTable[requestObject.getProtocolNumber()])
 
         userDefinedFunction = self.__protocolTable[requestObject.getProtocolNumber()]
 
