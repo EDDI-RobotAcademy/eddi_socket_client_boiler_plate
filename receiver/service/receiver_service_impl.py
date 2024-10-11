@@ -126,6 +126,8 @@ class ReceiverServiceImpl(ReceiverService):
                 data = dictionaryData.get("data", {})
                 # ColorPrinter.print_important_data(f"Receiver-{receiverId} data", data)
 
+                protocol = None
+
                 if protocolNumber is not None:
                     # ColorPrinter.print_important_data(f"Receiver-{receiverId} received protocol",
                     #                                   f"Protocol Number: {protocolNumber}, Data: {data}")
