@@ -138,7 +138,7 @@ class ReceiverServiceImpl(ReceiverService):
                             try:
                                 protocol = UserDefinedProtocolNumber(protocolNumber)
                             except ValueError:
-                                ColorPrinter.print_important_data(f"Receiver-{receiverId} CustomProtocolNumber 혹은 UserDefinedProtocolNumber에서 지원하지 않는 프로토콜입니다.")
+                                ColorPrinter.print_important_data(f"Receiver-{receiverId} CustomProtocolNumber 혹은 UserDefinedProtocolNumber에서 지원하지 않는 프로토콜입니다", protocolNumber)
                         else:
                             ColorPrinter.print_important_message(f"Receiver-{receiverId} Socket Client는 CustomProtocolNumber만 지원하므로 DLLS-Client 구성을 하세요!")
                             continue
