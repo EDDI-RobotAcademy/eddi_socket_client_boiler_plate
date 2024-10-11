@@ -11,5 +11,5 @@ class CommandExecutorService(ABC):
         pass
 
     @abstractmethod
-    def executeCommand(self):
+    def executeCommand(self, executorId):
         pass

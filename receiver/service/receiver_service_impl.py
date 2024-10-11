@@ -77,15 +77,15 @@ class ReceiverServiceImpl(ReceiverService):
 
         return False
 
-    def requestToReceiveCommand(self):
+    def requestToReceiveCommand(self, receiverId):
         while self.__blockToAcquireSocket():
-            ColorPrinter.print_important_message("Receiver: Try to get SSL Socket")
+            ColorPrinter.print_important_message(f"Receiver-{receiverId}: Try to get SSL Socket")
             sleep(0.5)
 
-        ColorPrinter.print_important_message("Receiver 구동 성공!")
+        ColorPrinter.print_important_message(f"Receiver-{receiverId} 구동 성공!")
 
         clientSocketObject = self.__criticalSectionManager.getClientSocket()
-        ColorPrinter.print_important_data("requestToReceiveCommand() -> clientSocketObject", clientSocketObject)
+        ColorPrinter.print_important_data(f"Receiver-{receiverId} requestToReceiveCommand() -> clientSocketObject", clientSocketObject)
 
         while True:
             try:
@@ -96,39 +96,39 @@ class ReceiverServiceImpl(ReceiverService):
                         continue
 
                     headerData = self.__recvFixedLength(clientSocketObject, 58)
-                    ColorPrinter.print_important_data("headerData", headerData)
+                    ColorPrinter.print_important_data(f"Receiver-{receiverId} headerData", headerData)
 
                     parsedHeaderData = json.loads(headerData)
                     protocolNumber = int(parsedHeaderData.get("protocolNumber"))
                     packetDataLength = int(parsedHeaderData.get("packetDataLength").strip())
-                    ColorPrinter.print_important_data("protocolNumber", protocolNumber)
-                    ColorPrinter.print_important_data("packetDataLength", packetDataLength)
+                    # ColorPrinter.print_important_data(f"Receiver-{receiverId} protocolNumber", protocolNumber)
+                    # ColorPrinter.print_important_data(f"Receiver-{receiverId} packetDataLength", packetDataLength)
 
                     receivedData = self.__recvFixedLength(clientSocketObject, packetDataLength)
 
                 if not receivedData:
-                    ColorPrinter.print_important_message("빈 데이터 수신, 연결을 종료합니다.")
+                    ColorPrinter.print_important_message(f"Receiver-{receiverId} 빈 데이터 수신, 연결을 종료합니다.")
                     self.__receiverRepository.closeConnection()
                     break
 
                 # 수신한 데이터가 유효한 JSON인지 확인
                 try:
                     dictionaryData = json.loads(receivedData)
-                    ColorPrinter.print_important_data("dictionaryData", dictionaryData)
+                    # ColorPrinter.print_important_data(f"Receiver-{receiverId} dictionaryData", dictionaryData)
 
                 except json.JSONDecodeError as e:
-                    ColorPrinter.print_important_data("JSON Decode Error: 수신된 데이터가 JSON 형식이 아닙니다", str(e))
+                    ColorPrinter.print_important_data(f"Receiver-{receiverId} JSON Decode Error: 수신된 데이터가 JSON 형식이 아닙니다", str(e))
                     continue
 
                 protocolNumber = dictionaryData.get("command")
-                ColorPrinter.print_important_data("protocolNumber", protocolNumber)
+                # ColorPrinter.print_important_data(f"Receiver-{receiverId} protocolNumber", protocolNumber)
 
                 data = dictionaryData.get("data", {})
-                ColorPrinter.print_important_data("data", data)
+                # ColorPrinter.print_important_data(f"Receiver-{receiverId} data", data)
 
                 if protocolNumber is not None:
-                    ColorPrinter.print_important_data("received protocol",
-                                                      f"Protocol Number: {protocolNumber}, Data: {data}")
+                    # ColorPrinter.print_important_data(f"Receiver-{receiverId} received protocol",
+                    #                                   f"Protocol Number: {protocolNumber}, Data: {data}")
 
                     try:
                         protocol = CustomProtocolNumber(protocolNumber)
@@ -138,13 +138,13 @@ class ReceiverServiceImpl(ReceiverService):
                             try:
                                 protocol = UserDefinedProtocolNumber(protocolNumber)
                             except ValueError:
-                                ColorPrinter.print_important_data("CustomProtocolNumber 혹은 UserDefinedProtocolNumber에서 지원하지 않는 프로토콜입니다.")
+                                ColorPrinter.print_important_data(f"Receiver-{receiverId} CustomProtocolNumber 혹은 UserDefinedProtocolNumber에서 지원하지 않는 프로토콜입니다.")
                         else:
-                            ColorPrinter.print_important_message("Socket Client는 CustomProtocolNumber만 지원하므로 DLLS-Client 구성을 하세요!")
+                            ColorPrinter.print_important_message(f"Receiver-{receiverId} Socket Client는 CustomProtocolNumber만 지원하므로 DLLS-Client 구성을 하세요!")
                             continue
 
                     request = self.__requestGeneratorInstance.generate(protocol, data)
-                    ColorPrinter.print_important_data("processed request", f"{request}")
+                    ColorPrinter.print_important_data(f"Receiver-{receiverId} processed request", f"{request}")
 
                     self.__receiverRepository.sendDataToCommandAnalyzer(request)
 
@@ -157,7 +157,7 @@ class ReceiverServiceImpl(ReceiverService):
                 continue
 
             except ssl.SSLError as sslError:
-                ColorPrinter.print_important_data("receive 중 SSL Error", str(sslError))
+                ColorPrinter.print_important_data(f"Receiver-{receiverId} receive 중 SSL Error", str(sslError))
                 self.__receiverRepository.closeConnection()
                 break
 
@@ -166,20 +166,20 @@ class ReceiverServiceImpl(ReceiverService):
 
             except socket.error as socketException:
                 if socketException.errno in (errno.EAGAIN, errno.EWOULDBLOCK):
-                    ColorPrinter.print_important_message("문제 없음")
-                    sleep(0.5)
+                    ColorPrinter.print_important_message(f"Receiver-{receiverId} 문제 없음")
+                    sleep(0.2)
                 else:
-                    ColorPrinter.print_important_message("수신 중 에러")
+                    ColorPrinter.print_important_message(f"Receiver-{receiverId} 수신 중 에러")
                     self.__receiverRepository.closeConnection()
                     break
 
             except (socket.error, BrokenPipeError) as exception:
-                ColorPrinter.print_important_message("Broken Pipe")
+                ColorPrinter.print_important_message(f"Receiver-{receiverId} Broken Pipe")
                 self.__receiverRepository.closeConnection()
                 break
 
             except Exception as exception:
-                ColorPrinter.print_important_data("Receiver Exception 정보", str(exception))
+                ColorPrinter.print_important_data(f"Receiver-{receiverId} Exception 정보", str(exception))
 
             finally:
-                sleep(0.5)
+                sleep(0.2)

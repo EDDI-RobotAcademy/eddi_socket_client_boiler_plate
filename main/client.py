@@ -1,3 +1,5 @@
+import time
+
 import colorama
 
 from client_socket.service.client_socket_service_impl import ClientSocketServiceImpl
@@ -12,6 +14,7 @@ from response_generator.response_class_map import ResponseClassMap
 from ssl_tls.ssl_tls_context_manager import SslTlsContextManager
 from task_worker.service.task_worker_service_impl import TaskWorkerServiceImpl
 from thread_worker.service.thread_worker_service_impl import ThreadWorkerServiceImpl
+from thread_worker_pool.service.thread_worker_pool_service_impl import ThreadWorkerPoolServiceImpl
 from transmitter.service.transmitter_service_impl import TransmitterServiceImpl
 from utility.color_print import ColorPrinter
 
@@ -43,15 +46,38 @@ if __name__ == "__main__":
     commandAnalyzerService = CommandAnalyzerServiceImpl.getInstance()
     commandExecutorService = CommandExecutorServiceImpl.getInstance()
 
-    threadWorkerService = ThreadWorkerServiceImpl.getInstance()
-    threadWorkerService.createThreadWorker("Receiver", receiverService.requestToReceiveCommand)
-    threadWorkerService.executeThreadWorker("Receiver")
+    # threadWorkerService = ThreadWorkerServiceImpl.getInstance(8)
+    # threadWorkerService.createThreadWorker("Receiver", receiverService.requestToReceiveCommand)
+    # threadWorkerService.executeThreadWorker("Receiver")
+    #
+    # threadWorkerService.createThreadWorker("CommandAnalyzer", commandAnalyzerService.analysisCommand)
+    # threadWorkerService.executeThreadWorker("CommandAnalyzer")
+    #
+    # threadWorkerService.createThreadWorker("CommandExecutor", commandExecutorService.executeCommand)
+    # threadWorkerService.executeThreadWorker("CommandExecutor")
+    #
+    # threadWorkerService.createThreadWorker("Transmitter", transmitterService.requestToTransmitResult)
+    # threadWorkerService.executeThreadWorker("Transmitter")
 
-    threadWorkerService.createThreadWorker("CommandAnalyzer", commandAnalyzerService.analysisCommand)
-    threadWorkerService.executeThreadWorker("CommandAnalyzer")
+    threadWorkerPoolService = ThreadWorkerPoolServiceImpl.getInstance()
+    threadWorkerPoolService.createThreadWorkerPool("Receiver", 6)
+    threadWorkerPoolService.allocateExecuteFunction("Receiver", receiverService.requestToReceiveCommand)
+    receiverFutures = threadWorkerPoolService.executeThreadPoolWorker("Receiver")
 
-    threadWorkerService.createThreadWorker("CommandExecutor", commandExecutorService.executeCommand)
-    threadWorkerService.executeThreadWorker("CommandExecutor")
+    threadWorkerPoolService.createThreadWorkerPool("CommandAnalyzer", 6)
+    threadWorkerPoolService.allocateExecuteFunction("CommandAnalyzer", commandAnalyzerService.analysisCommand)
+    threadWorkerPoolService.executeThreadPoolWorker("CommandAnalyzer")
 
-    threadWorkerService.createThreadWorker("Transmitter", transmitterService.requestToTransmitResult)
-    threadWorkerService.executeThreadWorker("Transmitter")
+    threadWorkerPoolService.createThreadWorkerPool("CommandExecutor", 5)
+    threadWorkerPoolService.allocateExecuteFunction("CommandExecutor", commandExecutorService.executeCommand)
+    threadWorkerPoolService.executeThreadPoolWorker("CommandExecutor")
+
+    threadWorkerPoolService.createThreadWorkerPool("Transmitter", 1)
+    threadWorkerPoolService.allocateExecuteFunction("Transmitter", transmitterService.requestToTransmitResult)
+    threadWorkerPoolService.executeThreadPoolWorker("Transmitter")
+
+    try:
+        while True:
+            time.sleep(1000)
+    except KeyboardInterrupt:
+        print("프로그램을 종료합니다.")

@@ -11,5 +11,5 @@ class ReceiverService(ABC):
         pass
 
     @abstractmethod
-    def requestToReceiveCommand(self):
+    def requestToReceiveCommand(self, receiverId):
         pass

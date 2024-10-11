@@ -85,15 +85,15 @@ class TransmitterServiceImpl(TransmitterService):
 
         return False
 
-    def requestToTransmitResult(self):
+    def requestToTransmitResult(self, transmitterId):
         while self.__blockToAcquireSocket():
-            ColorPrinter.print_important_message("Transmitter: Try to get SSL Socket")
+            ColorPrinter.print_important_message(f"Transmitter-{transmitterId}: Try to get SSL Socket")
             sleep(0.5)
 
-        ColorPrinter.print_important_message("Transmitter 구동 성공!")
+        ColorPrinter.print_important_message(f"Transmitter-{transmitterId} 구동 성공!")
 
         clientSocketObject = self.__criticalSectionManager.getClientSocket()
-        ColorPrinter.print_important_data("requestToTransmitResult() -> clientSocketObject", clientSocketObject)
+        ColorPrinter.print_important_data(f"Transmitter-{transmitterId} requestToTransmitResult() -> clientSocketObject", clientSocketObject)
 
         while True:
             try:
@@ -125,8 +125,8 @@ class TransmitterServiceImpl(TransmitterService):
                 dictionarizedPacketLengthResponse = packetLengthResponse.toFixedSizeDictionary()
                 serializedPacketLengthData = json.dumps(dictionarizedPacketLengthResponse, ensure_ascii=False)
                 # ColorPrinter.print_important_data("utf8EncodedRequestData", utf8EncodedRequestData)
-                ColorPrinter.print_important_data("패킷 길이 응답", serializedPacketLengthData)
-                ColorPrinter.print_important_data("패킷 길이 객체의 길이", len(serializedPacketLengthData))
+                ColorPrinter.print_important_data(f"Transmitter-{transmitterId} 패킷 길이 응답", serializedPacketLengthData)
+                ColorPrinter.print_important_data(f"Transmitter-{transmitterId} 패킷 길이 객체의 길이", len(serializedPacketLengthData))
 
                 with self.__transmitterLock:
                     # 전체 패킷 길이 전송
@@ -139,13 +139,13 @@ class TransmitterServiceImpl(TransmitterService):
                 return None
 
             except socket.error as exception:
-                print("전송 중 에러")
+                print(f"Transmitter-{transmitterId} 전송 중 에러")
 
             except Exception as exception:
-                print(f"Transmitter: {str(exception)}")
+                print(f"Transmitter-{transmitterId}: {str(exception)}")
 
             finally:
-                sleep(0.5)
+                sleep(0.2)
 
 
 

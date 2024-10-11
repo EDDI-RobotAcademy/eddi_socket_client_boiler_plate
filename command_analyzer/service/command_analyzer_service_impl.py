@@ -29,15 +29,15 @@ class CommandAnalyzerServiceImpl(CommandAnalyzerService):
     def requestToInjectAnalyzerExecutorChannel(self, ipcAnalyzerExecutorChannel):
         self.__commandAnalyzerRepository.injectAnalyzerExecutorChannel(ipcAnalyzerExecutorChannel)
 
-    def analysisCommand(self):
-        ColorPrinter.print_important_message("Command Analyzer 구동 성공!")
+    def analysisCommand(self, analyzerId):
+        ColorPrinter.print_important_message(f"Analyzer-{analyzerId} Command Analyzer 구동 성공!")
 
         while True:
             needToAnalysisRequestedData = self.__commandAnalyzerRepository.acquireNeedToAnalysisRequestedData()
-            ColorPrinter.print_important_data("Command Analyzer -> 분석할 데이터", needToAnalysisRequestedData)
+            ColorPrinter.print_important_data(f"Analyzer-{analyzerId} Command Analyzer -> 분석할 데이터", needToAnalysisRequestedData)
 
             if ProtocolValidator.validate(needToAnalysisRequestedData):
                 self.__commandAnalyzerRepository.sendDataToCommandExecutor(needToAnalysisRequestedData)
 
-            sleep(1)
+            sleep(0.2)
     

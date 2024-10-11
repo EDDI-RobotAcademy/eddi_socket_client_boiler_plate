@@ -30,15 +30,15 @@ class CommandExecutorServiceImpl(CommandExecutorService):
     def requestToInjectExecutorTransmitterChannel(self, ipcExecutorTransmitterChannel):
         self.__commandExecutorRepository.injectExecutorTransmitter(ipcExecutorTransmitterChannel)
 
-    def executeCommand(self):
-        ColorPrinter.print_important_message("Command Executor 구동 성공!")
+    def executeCommand(self, executorId):
+        ColorPrinter.print_important_message(f"Executor-{executorId} Command Executor 구동 성공!")
 
         while True:
             willBeExecuteData = self.__commandExecutorRepository.acquireWillBeExecuteData()
-            ColorPrinter.print_important_data("Command Executor -> 실행할 데이터", willBeExecuteData)
+            ColorPrinter.print_important_data(f"Executor-{executorId} Command Executor -> 실행할 데이터", willBeExecuteData)
 
             response = self.__customProtocolRepository.execute(willBeExecuteData)
             willBeTransmitDataTuple = (willBeExecuteData.getProtocolNumber(), response)
             self.__commandExecutorRepository.sendResponseToTransmitter(willBeTransmitDataTuple)
 
-            sleep(0.5)
+            sleep(0.2)
