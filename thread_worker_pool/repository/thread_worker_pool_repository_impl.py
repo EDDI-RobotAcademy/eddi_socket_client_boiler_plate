@@ -1,4 +1,7 @@
-from concurrent.futures import ThreadPoolExecutor
+import asyncio
+import concurrent
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from thread_worker_pool.entity.thread_worker_pool import ThreadWorkerPool
 from thread_worker_pool.repository.thread_worker_pool_repository import ThreadWorkerPoolRepository
@@ -12,6 +15,9 @@ class ThreadWorkerPoolRepositoryImpl(ThreadWorkerPoolRepository):
     def __new__(cls):
         if cls.__instance is None:
             cls.__instance = super().__new__(cls)
+
+            cls.__instance.executor = concurrent.futures.ThreadPoolExecutor()
+            cls.__instance.lock = threading.Lock()
 
         return cls.__instance
 
@@ -49,8 +55,12 @@ class ThreadWorkerPoolRepositoryImpl(ThreadWorkerPoolRepository):
         return self.__poolDictionary[pipeline_stage]
 
     def shutdownPool(self, pipeline_stage):
-        if pipeline_stage in self.__poolDictionary:
-            self.__poolDictionary[pipeline_stage].shutdown(wait=True)
+        pool_info = self.__poolDictionary.get(pipeline_stage)
+        if pool_info:
+            executor = pool_info["executor"]
+            worker_pool = pool_info["entity"]
+
+            executor.shutdown(wait=True)
             ColorPrinter.print_important_data("Shutdown Threadpool worker", pipeline_stage)
 
             del self.__poolDictionary[pipeline_stage]
@@ -64,25 +74,23 @@ class ThreadWorkerPoolRepositoryImpl(ThreadWorkerPoolRepository):
             ColorPrinter.print_important_data("Shutdown every Threadpool worker", stage)
             del self.__poolDictionary[stage]
 
-    def executeThreadPoolWorker(self, pipeline_stage, *args):
-        ColorPrinter.print_important_data("ThreadPool started", pipeline_stage)
-        pool_info = self.__poolDictionary.get(pipeline_stage)
+    def executeThreadPoolWorker(self, worker_name, worker_func, *args):
+        ColorPrinter.print_important_message(f"Starting {worker_name} worker thread.")
 
-        if not pool_info:
-            raise ValueError(f"No ThreadWorkerPool found for {pipeline_stage}")
+        try:
+            # 스레드 풀에서 작업을 제출합니다.
+            future = self.executor.submit(worker_func, *args)
+            future.add_done_callback(self.thread_completed_callback)  # 작업 완료 시 호출되는 콜백 추가
+        except Exception as e:
+            ColorPrinter.print_important_message(f"Failed to start {worker_name}: {e}")
 
-        pool = pool_info["executor"]
-        worker_pool = pool_info["entity"]
-        futures = []
+    def thread_completed_callback(self, future):
+        try:
+            result = future.result()  # 작업 결과를 가져옵니다.
+            ColorPrinter.print_important_message(f"Thread completed with result: {result}")
+        except Exception as e:
+            ColorPrinter.print_important_message(f"Thread failed with exception: {e}")
 
-        max_workers = worker_pool.getMaxWorkers()
-
-        for i in range(max_workers):
-            worker_func = worker_pool.getWillBeExecuteFunction()
-            ColorPrinter.print_important_data("execute_thread_pool_worker() -> worker_func", worker_func)
-            future = pool.submit(worker_func, i + 1, *args)
-            ColorPrinter.print_important_data("execute_thread_pool_worker() -> future", future)
-            worker_pool.setThreadId(future)
-            futures.append(future)
-
-        return futures
+    def shutdown(self):
+        ColorPrinter.print_important_message("Shutting down thread pool.")
+        self.executor.shutdown(wait=True)
