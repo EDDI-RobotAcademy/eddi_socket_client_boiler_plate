@@ -1,5 +1,7 @@
 from time import sleep
 
+from conditional_custom_executor.repository.conditional_custom_executor_repository_impl import \
+    ConditionalCustomExecutorRepositoryImpl
 from conditional_custom_executor.service.conditional_custom_executor_service import ConditionalCustomExecutorService
 from custom_protocol.repository.custom_protocol_repository_impl import CustomProtocolRepositoryImpl
 from utility.color_print import ColorPrinter
