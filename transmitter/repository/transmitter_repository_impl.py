@@ -31,11 +31,14 @@ class TransmitterRepositoryImpl(TransmitterRepository):
     def injectConditionalCustomExecutorTransmitterChannel(self, ipcConditionalCustomExecutorTransmitterChannel):
         self.__ipcConditionalCustomExecutorTransmitterChannel = ipcConditionalCustomExecutorTransmitterChannel
 
+    def acquireConditionalCustomExecutorResult(self):
+        return self.__ipcConditionalCustomExecutorTransmitterChannel.get(False)
+
     def getClientSocket(self):
         return self.__clientSocket
 
     def acquireWillBeTransmit(self):
-        return self.__ipcExecutorTransmitterChannel.get()
+        return self.__ipcExecutorTransmitterChannel.get(False)
 
     def transmit(self, clientSocketObject, serializedTransmitData):
         clientSocketObject.sendall(serializedTransmitData.encode())
