@@ -1,10 +1,12 @@
 from command_executor.repository.command_executor_repository import CommandExecutorRepository
+from utility.color_print import ColorPrinter
 
 
 class CommandExecutorRepositoryImpl(CommandExecutorRepository):
     __instance = None
     __ipcAnalyzerExecutorChannel = None
     __ipcExecutorTransmitterChannel = None
+    __ipcExecutorConditionalCustomExecutorChannel = None
 
     def __new__(cls):
         if cls.__instance is None:
@@ -24,6 +26,13 @@ class CommandExecutorRepositoryImpl(CommandExecutorRepository):
 
     def injectExecutorTransmitter(self, ipcExecutorTransmitterChannel):
         self.__ipcExecutorTransmitterChannel = ipcExecutorTransmitterChannel
+
+    def injectExecutorConditionalCustomExecutor(self, ipcExecutorConditionalCustomExecutorChannel):
+        ColorPrinter.print_important_message(f"injectExecutorConditionalCustomExecutor(): {ipcExecutorConditionalCustomExecutorChannel}")
+        self.__ipcExecutorConditionalCustomExecutorChannel = ipcExecutorConditionalCustomExecutorChannel
+
+    def getIPCExecutorConditionalCustomExecutorChannel(self):
+        return self.__ipcExecutorConditionalCustomExecutorChannel
 
     def acquireWillBeExecuteData(self):
         return self.__ipcAnalyzerExecutorChannel.get()

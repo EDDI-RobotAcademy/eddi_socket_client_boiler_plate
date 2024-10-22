@@ -30,8 +30,13 @@ class CommandExecutorServiceImpl(CommandExecutorService):
     def requestToInjectExecutorTransmitterChannel(self, ipcExecutorTransmitterChannel):
         self.__commandExecutorRepository.injectExecutorTransmitter(ipcExecutorTransmitterChannel)
 
+    def requestToInjectExecutorConditionalCustomExecutorChannel(self, ipcExecutorConditionalCustomExecutorChannel):
+        self.__commandExecutorRepository.injectExecutorConditionalCustomExecutor(ipcExecutorConditionalCustomExecutorChannel)
+
     def executeCommand(self, executorId):
         ColorPrinter.print_important_message(f"Executor-{executorId} Command Executor 구동 성공!")
+        ipcExecutorConditionalCustomExecutorChannel = self.__commandExecutorRepository.getIPCExecutorConditionalCustomExecutorChannel()
+        ColorPrinter.print_important_message(f"Executor-{executorId} ipcExecutorConditionalCustomExecutorChannel: {ipcExecutorConditionalCustomExecutorChannel}")
 
         while True:
             willBeExecuteData = self.__commandExecutorRepository.acquireWillBeExecuteData()

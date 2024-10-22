@@ -11,7 +11,7 @@ class ConditionalCustomExecutorRepository(ABC):
         pass
 
     @abstractmethod
-    def acquireWillBeExecuteData(self):
+    def acquireConditionalTransmitData(self):
         pass
 
     @abstractmethod

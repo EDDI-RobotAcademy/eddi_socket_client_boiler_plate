@@ -35,11 +35,9 @@ class ConditionalCustomExecutorServiceImpl(ConditionalCustomExecutorService):
         ColorPrinter.print_important_message(f"ConditionalCustomExecutor-{conditionalCustomExecutorId} 구동 성공!")
 
         while True:
-            willBeExecuteData = self.__conditionalCustomExecutorRepository.acquireWillBeExecuteData()
-            ColorPrinter.print_important_data(f"ConditionalCustomExecutor-{conditionalCustomExecutorId} -> 실행할 데이터", willBeExecuteData)
+            conditionalTransmitData = self.__conditionalCustomExecutorRepository.acquireConditionalTransmitData()
+            ColorPrinter.print_important_data(f"ConditionalCustomExecutor-{conditionalCustomExecutorId} -> 데이터", conditionalTransmitData)
 
-            response = self.__conditionalCustomExecutorRepository.execute(willBeExecuteData)
-            willBeTransmitDataTuple = (willBeExecuteData.getProtocolNumber(), response)
-            self.__conditionalCustomExecutorRepository.sendResponseToTransmitter(willBeTransmitDataTuple)
+            self.__conditionalCustomExecutorRepository.sendResponseToTransmitter(conditionalTransmitData)
 
             sleep(0.2)

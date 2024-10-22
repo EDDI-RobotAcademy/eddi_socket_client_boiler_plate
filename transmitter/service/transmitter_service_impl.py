@@ -45,6 +45,9 @@ class TransmitterServiceImpl(TransmitterService):
     def requestToInjectExecutorTransmitterChannel(self, ipcExecutorTransmitterChannel):
         self.__transmitterRepository.injectExecutorTransmitterChannel(ipcExecutorTransmitterChannel)
 
+    def requestToInjectConditionalCustomExecutorTransmitterChannel(self, ipcConditionalCustomExecutorTransmitterChannel):
+        self.__transmitterRepository.injectConditionalCustomExecutorTransmitterChannel(ipcConditionalCustomExecutorTransmitterChannel)
+
     # def __blockToAcquireSocket(self):
     #     if self.__transmitterRepository.getClientSocket() is None:
     #         return True
