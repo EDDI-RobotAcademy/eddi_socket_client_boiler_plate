@@ -28,8 +28,8 @@ class ConditionalCustomExecutorRepositoryImpl(ConditionalCustomExecutorRepositor
     def injectConditionalCustomExecutorTransmitterChannel(self, ipcConditionalCustomExecutorTransmitterChannel):
         self.__ipcConditionalCustomExecutorTransmitterChannel = ipcConditionalCustomExecutorTransmitterChannel
 
-    def acquireWillBeExecuteData(self):
-        return self.__ipcExecutorConditionalCustomExecutorChannel.get()
+    def acquireConditionalTransmitData(self):
+        return self.__ipcExecutorConditionalCustomExecutorChannel.get(False)
 
     def sendResponseToTransmitter(self, response):
         self.__ipcConditionalCustomExecutorTransmitterChannel.put(response)

@@ -7,6 +7,7 @@ class TransmitterRepositoryImpl(TransmitterRepository):
     __instance = None
     __clientSocket = None
     __ipcExecutorTransmitterChannel = None
+    __ipcConditionalCustomExecutorTransmitterChannel = None
 
     def __new__(cls):
         if cls.__instance is None:
@@ -26,6 +27,9 @@ class TransmitterRepositoryImpl(TransmitterRepository):
 
     def injectExecutorTransmitterChannel(self, ipcExecutorTransmitterChannel):
         self.__ipcExecutorTransmitterChannel = ipcExecutorTransmitterChannel
+
+    def injectConditionalCustomExecutorTransmitterChannel(self, ipcConditionalCustomExecutorTransmitterChannel):
+        self.__ipcConditionalCustomExecutorTransmitterChannel = ipcConditionalCustomExecutorTransmitterChannel
 
     def getClientSocket(self):
         return self.__clientSocket

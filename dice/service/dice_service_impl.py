@@ -21,13 +21,13 @@ class DiceServiceImpl(DiceService):
 
         return cls.__instance
 
-    def rollDice(self):
+    def rollDice(self, ipcExecutorConditionalCustomExecutorChannel):
         self.__diceRepository.roll()
 
-    def diceList(self):
+    def diceList(self, ipcExecutorConditionalCustomExecutorChannel):
         diceList = self.__diceRepository.list()
         return ListDiceResponse(CustomProtocolNumber.LIST_DICE, diceList)
 
-    async def asyncRollDice(self):
+    async def asyncRollDice(self, ipcExecutorConditionalCustomExecutorChannel):
         await self.__diceRepository.asyncRoll()
 

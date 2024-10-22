@@ -45,6 +45,9 @@ class TransmitterServiceImpl(TransmitterService):
     def requestToInjectExecutorTransmitterChannel(self, ipcExecutorTransmitterChannel):
         self.__transmitterRepository.injectExecutorTransmitterChannel(ipcExecutorTransmitterChannel)
 
+    def requestToInjectConditionalCustomExecutorTransmitterChannel(self, ipcConditionalCustomExecutorTransmitterChannel):
+        self.__transmitterRepository.injectConditionalCustomExecutorTransmitterChannel(ipcConditionalCustomExecutorTransmitterChannel)
+
     # def __blockToAcquireSocket(self):
     #     if self.__transmitterRepository.getClientSocket() is None:
     #         return True
@@ -98,7 +101,7 @@ class TransmitterServiceImpl(TransmitterService):
         while True:
             try:
                 willBeTransmitResponse = self.__transmitterRepository.acquireWillBeTransmit()
-                # ColorPrinter.print_important_data("Transmitter -> 전송할 데이터", willBeTransmitResponse)
+                ColorPrinter.print_important_data("Transmitter -> 전송할 데이터", willBeTransmitResponse)
 
                 protocolNumber, response = willBeTransmitResponse
                 socketResponse = self.__responseGeneratorInstance.generate(protocolNumber, response)

@@ -30,15 +30,22 @@ class CommandExecutorServiceImpl(CommandExecutorService):
     def requestToInjectExecutorTransmitterChannel(self, ipcExecutorTransmitterChannel):
         self.__commandExecutorRepository.injectExecutorTransmitter(ipcExecutorTransmitterChannel)
 
+    def requestToInjectExecutorConditionalCustomExecutorChannel(self, ipcExecutorConditionalCustomExecutorChannel):
+        self.__commandExecutorRepository.injectExecutorConditionalCustomExecutor(ipcExecutorConditionalCustomExecutorChannel)
+
     def executeCommand(self, executorId):
         ColorPrinter.print_important_message(f"Executor-{executorId} Command Executor 구동 성공!")
+        ipcExecutorConditionalCustomExecutorChannel = self.__commandExecutorRepository.getIPCExecutorConditionalCustomExecutorChannel()
+        ColorPrinter.print_important_message(f"Executor-{executorId} ipcExecutorConditionalCustomExecutorChannel: {ipcExecutorConditionalCustomExecutorChannel}")
 
         while True:
             willBeExecuteData = self.__commandExecutorRepository.acquireWillBeExecuteData()
             ColorPrinter.print_important_data(f"Executor-{executorId} Command Executor -> 실행할 데이터", willBeExecuteData)
 
-            response = self.__customProtocolRepository.execute(willBeExecuteData)
+            # response = self.__customProtocolRepository.execute(willBeExecuteData)
+            response = self.__customProtocolRepository.execute(willBeExecuteData, ipcExecutorConditionalCustomExecutorChannel)
             willBeTransmitDataTuple = (willBeExecuteData.getProtocolNumber(), response)
             self.__commandExecutorRepository.sendResponseToTransmitter(willBeTransmitDataTuple)
+            ColorPrinter.print_important_data(f"Executor-{executorId} Command Executor -> 실행할 데이터", willBeExecuteData)
 
             sleep(0.2)

@@ -1,3 +1,4 @@
+import queue
 from time import sleep
 
 from conditional_custom_executor.repository.conditional_custom_executor_repository_impl import \
@@ -35,11 +36,17 @@ class ConditionalCustomExecutorServiceImpl(ConditionalCustomExecutorService):
         ColorPrinter.print_important_message(f"ConditionalCustomExecutor-{conditionalCustomExecutorId} 구동 성공!")
 
         while True:
-            willBeExecuteData = self.__conditionalCustomExecutorRepository.acquireWillBeExecuteData()
-            ColorPrinter.print_important_data(f"ConditionalCustomExecutor-{conditionalCustomExecutorId} -> 실행할 데이터", willBeExecuteData)
+            try:
+                conditionalTransmitData = self.__conditionalCustomExecutorRepository.acquireConditionalTransmitData()
+                ColorPrinter.print_important_data(f"ConditionalCustomExecutor-{conditionalCustomExecutorId} -> 데이터", conditionalTransmitData)
 
-            response = self.__conditionalCustomExecutorRepository.execute(willBeExecuteData)
-            willBeTransmitDataTuple = (willBeExecuteData.getProtocolNumber(), response)
-            self.__conditionalCustomExecutorRepository.sendResponseToTransmitter(willBeTransmitDataTuple)
+                self.__conditionalCustomExecutorRepository.sendResponseToTransmitter(conditionalTransmitData)
 
-            sleep(0.2)
+            except queue.Empty:
+                ColorPrinter.print_warning_message(f"ConditionalCustomExecutor-{conditionalCustomExecutorId}: 큐가 비어 있습니다. 데이터 대기 중...")
+                sleep(0.2)
+
+            except Exception as exception:
+                ColorPrinter.print_error_message(f"ConditionalCustomExecutor-{conditionalCustomExecutorId} 실행 중 에러 발생: {str(exception)}")
+
+            sleep(0.05)
