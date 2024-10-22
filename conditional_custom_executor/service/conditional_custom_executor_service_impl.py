@@ -43,10 +43,10 @@ class ConditionalCustomExecutorServiceImpl(ConditionalCustomExecutorService):
                 self.__conditionalCustomExecutorRepository.sendResponseToTransmitter(conditionalTransmitData)
 
             except queue.Empty:
-                ColorPrinter.print_warning_message(f"ConditionalCustomExecutor-{conditionalCustomExecutorId}: 큐가 비어 있습니다. 데이터 대기 중...")
+                # ColorPrinter.print_important_message(f"ConditionalCustomExecutor-{conditionalCustomExecutorId}: 큐가 비어 있습니다. 데이터 대기 중...")
                 sleep(0.2)
 
             except Exception as exception:
-                ColorPrinter.print_error_message(f"ConditionalCustomExecutor-{conditionalCustomExecutorId} 실행 중 에러 발생: {str(exception)}")
+                ColorPrinter.print_important_message(f"ConditionalCustomExecutor-{conditionalCustomExecutorId} 실행 중 에러 발생: {str(exception)}")
 
             sleep(0.05)
