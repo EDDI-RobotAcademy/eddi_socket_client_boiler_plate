@@ -42,8 +42,10 @@ class CommandExecutorServiceImpl(CommandExecutorService):
             willBeExecuteData = self.__commandExecutorRepository.acquireWillBeExecuteData()
             ColorPrinter.print_important_data(f"Executor-{executorId} Command Executor -> 실행할 데이터", willBeExecuteData)
 
-            response = self.__customProtocolRepository.execute(willBeExecuteData)
+            # response = self.__customProtocolRepository.execute(willBeExecuteData)
+            response = self.__customProtocolRepository.execute(willBeExecuteData, ipcExecutorConditionalCustomExecutorChannel)
             willBeTransmitDataTuple = (willBeExecuteData.getProtocolNumber(), response)
             self.__commandExecutorRepository.sendResponseToTransmitter(willBeTransmitDataTuple)
+            ColorPrinter.print_important_data(f"Executor-{executorId} Command Executor -> 실행할 데이터", willBeExecuteData)
 
             sleep(0.2)

@@ -3,13 +3,13 @@ from abc import ABC, abstractmethod
 
 class DiceService(ABC):
     @abstractmethod
-    def rollDice(self):
+    def rollDice(self, ipcExecutorConditionalCustomExecutorChannel):
         pass
 
     @abstractmethod
-    def diceList(self):
+    def diceList(self, ipcExecutorConditionalCustomExecutorChannel):
         pass
 
     @abstractmethod
-    async def asyncRollDice(self):
+    async def asyncRollDice(self, ipcExecutorConditionalCustomExecutorChannel):
         pass

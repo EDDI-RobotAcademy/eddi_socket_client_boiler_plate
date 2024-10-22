@@ -101,7 +101,7 @@ class TransmitterServiceImpl(TransmitterService):
         while True:
             try:
                 willBeTransmitResponse = self.__transmitterRepository.acquireWillBeTransmit()
-                # ColorPrinter.print_important_data("Transmitter -> 전송할 데이터", willBeTransmitResponse)
+                ColorPrinter.print_important_data("Transmitter -> 전송할 데이터", willBeTransmitResponse)
 
                 protocolNumber, response = willBeTransmitResponse
                 socketResponse = self.__responseGeneratorInstance.generate(protocolNumber, response)

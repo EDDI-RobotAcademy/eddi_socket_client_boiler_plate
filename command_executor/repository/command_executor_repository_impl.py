@@ -38,6 +38,7 @@ class CommandExecutorRepositoryImpl(CommandExecutorRepository):
         return self.__ipcAnalyzerExecutorChannel.get()
 
     def sendResponseToTransmitter(self, response):
+        ColorPrinter.print_important_message(f"sendResponseToTransmitter(): {response}")
         self.__ipcExecutorTransmitterChannel.put(response)
 
     def execute(self):
