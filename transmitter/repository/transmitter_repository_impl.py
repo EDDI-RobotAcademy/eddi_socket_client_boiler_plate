@@ -7,6 +7,7 @@ class TransmitterRepositoryImpl(TransmitterRepository):
     __instance = None
     __clientSocket = None
     __ipcExecutorTransmitterChannel = None
+    __ipcConditionalCustomExecutorTransmitterChannel = None
 
     def __new__(cls):
         if cls.__instance is None:
@@ -27,11 +28,17 @@ class TransmitterRepositoryImpl(TransmitterRepository):
     def injectExecutorTransmitterChannel(self, ipcExecutorTransmitterChannel):
         self.__ipcExecutorTransmitterChannel = ipcExecutorTransmitterChannel
 
+    def injectConditionalCustomExecutorTransmitterChannel(self, ipcConditionalCustomExecutorTransmitterChannel):
+        self.__ipcConditionalCustomExecutorTransmitterChannel = ipcConditionalCustomExecutorTransmitterChannel
+
+    def acquireConditionalCustomExecutorResult(self):
+        return self.__ipcConditionalCustomExecutorTransmitterChannel.get(False)
+
     def getClientSocket(self):
         return self.__clientSocket
 
     def acquireWillBeTransmit(self):
-        return self.__ipcExecutorTransmitterChannel.get()
+        return self.__ipcExecutorTransmitterChannel.get(False)
 
     def transmit(self, clientSocketObject, serializedTransmitData):
         clientSocketObject.sendall(serializedTransmitData.encode())

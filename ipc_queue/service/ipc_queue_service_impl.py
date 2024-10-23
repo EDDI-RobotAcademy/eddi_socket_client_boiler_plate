@@ -21,4 +21,7 @@ class IPCQueueServiceImpl(IPCQueueService):
 
     def createEssentialIPCQueue(self):
         self.__ipcQueueRepository.createEssentialIPCQueue()
+
+    def createOptionalIPCQueue(self):
+        self.__ipcQueueRepository.createOptionalIPCQueue()
     

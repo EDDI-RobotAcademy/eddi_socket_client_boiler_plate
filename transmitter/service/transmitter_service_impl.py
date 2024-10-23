@@ -1,4 +1,5 @@
 import json
+import queue
 import socket
 import threading
 from time import sleep
@@ -45,6 +46,9 @@ class TransmitterServiceImpl(TransmitterService):
     def requestToInjectExecutorTransmitterChannel(self, ipcExecutorTransmitterChannel):
         self.__transmitterRepository.injectExecutorTransmitterChannel(ipcExecutorTransmitterChannel)
 
+    def requestToInjectConditionalCustomExecutorTransmitterChannel(self, ipcConditionalCustomExecutorTransmitterChannel):
+        self.__transmitterRepository.injectConditionalCustomExecutorTransmitterChannel(ipcConditionalCustomExecutorTransmitterChannel)
+
     # def __blockToAcquireSocket(self):
     #     if self.__transmitterRepository.getClientSocket() is None:
     #         return True
@@ -85,6 +89,40 @@ class TransmitterServiceImpl(TransmitterService):
 
         return False
 
+    def __transmitResponse(self, transmitterId, protocolNumber, response):
+        # 소켓 응답 생성
+        socketResponse = self.__responseGeneratorInstance.generate(protocolNumber, response)
+
+        if socketResponse is None:
+            return
+
+        clientSocketObject = self.__criticalSectionManager.getClientSocket()
+
+        if clientSocketObject.fileno() == -1:  # 소켓이 유효한지 확인
+            raise socket.error("Socket is closed or invalid")
+
+        # 응답을 직렬화
+        dictionarizedResponse = socketResponse.toDictionary()
+        serializedRequestData = json.dumps(dictionarizedResponse, ensure_ascii=False)
+        utf8EncodedRequestData = serializedRequestData.encode("utf-8")
+
+        # 전체 패킷 길이 계산
+        packetLength = len(utf8EncodedRequestData)
+
+        # 패킷 길이 응답 생성
+        packetLengthResponse = PacketLengthResponse(packetLength)
+        dictionarizedPacketLengthResponse = packetLengthResponse.toFixedSizeDictionary()
+        serializedPacketLengthData = json.dumps(dictionarizedPacketLengthResponse, ensure_ascii=False)
+
+        ColorPrinter.print_important_data(f"Transmitter-{transmitterId} 패킷 길이 응답", serializedPacketLengthData)
+        ColorPrinter.print_important_data(f"Transmitter-{transmitterId} 패킷 길이 객체의 길이", len(serializedPacketLengthData))
+
+        with self.__transmitterLock:
+            # 전체 패킷 길이 전송
+            self.__transmitterRepository.transmit(clientSocketObject, serializedPacketLengthData)
+            # 실제 내용물 전송
+            self.__transmitInChunks(clientSocketObject, serializedRequestData)
+
     def requestToTransmitResult(self, transmitterId):
         while self.__blockToAcquireSocket():
             ColorPrinter.print_important_message(f"Transmitter-{transmitterId}: Try to get SSL Socket")
@@ -97,49 +135,57 @@ class TransmitterServiceImpl(TransmitterService):
 
         while True:
             try:
-                willBeTransmitResponse = self.__transmitterRepository.acquireWillBeTransmit()
+                try:
+                    conditionalCustomExecutorResult = self.__transmitterRepository.acquireConditionalCustomExecutorResult()
+                    ColorPrinter.print_important_data("Transmitter -> 조건부 전송 데이터", conditionalCustomExecutorResult)
+                    self.__transmitResponse(transmitterId, *conditionalCustomExecutorResult)
+                except queue.Empty:
+                    sleep(0.2)
+
+                try:
+                    willBeTransmitResponse = self.__transmitterRepository.acquireWillBeTransmit()
+                    ColorPrinter.print_important_data("Transmitter -> 전송할 데이터", willBeTransmitResponse)
+                    self.__transmitResponse(transmitterId, *willBeTransmitResponse)
+                except queue.Empty:
+                    sleep(0.2)
+
+                # willBeTransmitResponse = self.__transmitterRepository.acquireWillBeTransmit()
                 # ColorPrinter.print_important_data("Transmitter -> 전송할 데이터", willBeTransmitResponse)
-
-                protocolNumber, response = willBeTransmitResponse
-                socketResponse = self.__responseGeneratorInstance.generate(protocolNumber, response)
-                # socketResponse = ResponseGenerator.generate(protocolNumber, response)
-
-                if socketResponse is None:
-                    continue
-
-                if clientSocketObject.fileno() == -1:  # 소켓이 유효한지 확인
-                    raise socket.error("Socket is closed or invalid")
-
-                dictionarizedResponse = socketResponse.toDictionary()
-                serializedRequestData = json.dumps(dictionarizedResponse, ensure_ascii=False)
-                utf8EncodedRequestData = serializedRequestData.encode("utf-8")
-
-                # TODO: 전체 패킷 길이를 계산해야함
-                # 계산하여 수신측이 지속적으로 정보를 수신할 수 있도록 만들어야함
-                # 길이 계산이 잘못되고 있음
-                packetLength = len(utf8EncodedRequestData)
-                # ColorPrinter.print_important_data("전체 패킷 길이", packetLength)
-
-                # 일관성 유지를 위해 PacketLengthResponse를 구성하도록 만든다.
-                packetLengthResponse = PacketLengthResponse(packetLength)
-                dictionarizedPacketLengthResponse = packetLengthResponse.toFixedSizeDictionary()
-                serializedPacketLengthData = json.dumps(dictionarizedPacketLengthResponse, ensure_ascii=False)
-                # ColorPrinter.print_important_data("utf8EncodedRequestData", utf8EncodedRequestData)
-                ColorPrinter.print_important_data(f"Transmitter-{transmitterId} 패킷 길이 응답", serializedPacketLengthData)
-                ColorPrinter.print_important_data(f"Transmitter-{transmitterId} 패킷 길이 객체의 길이", len(serializedPacketLengthData))
-
-                with self.__transmitterLock:
-                    # 전체 패킷 길이 전송
-                    self.__transmitterRepository.transmit(clientSocketObject, serializedPacketLengthData)
-                    # 실제 내용물 전송
-                    # self.__transmitterRepository.transmit(clientSocketObject, serializedRequestData)
-                    self.__transmitInChunks(clientSocketObject, serializedRequestData)
+                #
+                # protocolNumber, response = willBeTransmitResponse
+                # socketResponse = self.__responseGeneratorInstance.generate(protocolNumber, response)
+                #
+                # if socketResponse is None:
+                #     continue
+                #
+                # if clientSocketObject.fileno() == -1:  # 소켓이 유효한지 확인
+                #     raise socket.error("Socket is closed or invalid")
+                #
+                # dictionarizedResponse = socketResponse.toDictionary()
+                # serializedRequestData = json.dumps(dictionarizedResponse, ensure_ascii=False)
+                # utf8EncodedRequestData = serializedRequestData.encode("utf-8")
+                #
+                # # 전체 패킷 길이 계산
+                # packetLength = len(utf8EncodedRequestData)
+                #
+                # # 일관성 유지를 위해 PacketLengthResponse를 구성하도록 만든다.
+                # packetLengthResponse = PacketLengthResponse(packetLength)
+                # dictionarizedPacketLengthResponse = packetLengthResponse.toFixedSizeDictionary()
+                # serializedPacketLengthData = json.dumps(dictionarizedPacketLengthResponse, ensure_ascii=False)
+                #
+                # ColorPrinter.print_important_data(f"Transmitter-{transmitterId} 패킷 길이 응답", serializedPacketLengthData)
+                # ColorPrinter.print_important_data(f"Transmitter-{transmitterId} 패킷 길이 객체의 길이",
+                #                                   len(serializedPacketLengthData))
+                #
+                # with self.__transmitterLock:
+                #     # 전체 패킷 길이 전송
+                #     self.__transmitterRepository.transmit(clientSocketObject, serializedPacketLengthData)
+                #     # 실제 내용물 전송
+                #     self.__transmitInChunks(clientSocketObject, serializedRequestData)
 
             except (socket.error, BrokenPipeError) as exception:
+                print(f"Transmitter-{transmitterId}: Socket error or broken pipe - {str(exception)}")
                 return None
-
-            except socket.error as exception:
-                print(f"Transmitter-{transmitterId} 전송 중 에러")
 
             except Exception as exception:
                 print(f"Transmitter-{transmitterId}: {str(exception)}")

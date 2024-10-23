@@ -10,6 +10,9 @@ class IPCQueueRepositoryImpl(IPCQueueRepository):
     __ipcAnalyzerExecutorChannel = None
     __ipcExecutorTransmitterChannel = None
 
+    __ipcExecutorConditionalCustomExecutorChannel = None
+    __ipcConditionalCustomExecutorTransmitterChannel = None
+
     def __new__(cls):
         if cls.__instance is None:
             cls.__instance = super().__new__(cls)
@@ -32,8 +35,18 @@ class IPCQueueRepositoryImpl(IPCQueueRepository):
     def getIPCExecutorTransmitterChannel(self):
         return self.__ipcExecutorTransmitterChannel
 
+    def getIPCExecutorConditionalCustomExecutorChannel(self):
+        return self.__ipcExecutorConditionalCustomExecutorChannel
+
+    def getIPCConditionalCustomExecutorTransmitterChannel(self):
+        return self.__ipcConditionalCustomExecutorTransmitterChannel
+
     def createEssentialIPCQueue(self):
         self.__ipcReceiverAnalyzerChannel = multiprocessing.Queue()
         self.__ipcAnalyzerExecutorChannel = multiprocessing.Queue()
         self.__ipcExecutorTransmitterChannel = multiprocessing.Queue()
+
+    def createOptionalIPCQueue(self):
+        self.__ipcExecutorConditionalCustomExecutorChannel = multiprocessing.Queue()
+        self.__ipcConditionalCustomExecutorTransmitterChannel = multiprocessing.Queue()
     

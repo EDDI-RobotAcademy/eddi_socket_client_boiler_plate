@@ -61,11 +61,11 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
 
         self.__protocolTable[protocolNumber.value] = customFunction
 
-    def __executeSynchronizeFunction(self, userDefinedFunction, parameterList):
+    def __executeSynchronizeFunction(self, userDefinedFunction, parameterList, ipcExecutorConditionalCustomExecutorChannel):
         if parameterList:
-            return userDefinedFunction(*parameterList)
+            return userDefinedFunction(*parameterList, ipcExecutorConditionalCustomExecutorChannel)
 
-        return userDefinedFunction()
+        return userDefinedFunction(ipcExecutorConditionalCustomExecutorChannel)
 
     def __extractParameterList(self, requestObject):
         if hasattr(requestObject, 'getParameterList') and callable(requestObject.getParameterList):
@@ -75,10 +75,10 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
 
         return []
 
-    async def __executeAsyncFunction(self, userDefinedFunction, parameterList):
-        return await userDefinedFunction(*parameterList)
+    async def __executeAsyncFunction(self, userDefinedFunction, parameterList, ipcExecutorConditionalCustomExecutorChannel):
+        return await userDefinedFunction(*parameterList, ipcExecutorConditionalCustomExecutorChannel)
 
-    def generalThreadExecutionFunction(self, userDefinedFunction, parameterList):
+    def generalThreadExecutionFunction(self, userDefinedFunction, parameterList, ipcExecutorConditionalCustomExecutorChannel):
         try:
             loop = asyncio.get_event_loop()
 
@@ -87,10 +87,10 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
             asyncio.set_event_loop(loop)
 
         if loop.is_running():
-            future = asyncio.ensure_future(self.__executeAsyncFunction(userDefinedFunction, parameterList))
+            future = asyncio.ensure_future(self.__executeAsyncFunction(userDefinedFunction, parameterList, ipcExecutorConditionalCustomExecutorChannel))
             result = asyncio.get_event_loop().run_until_complete(future)
         else:
-            result = loop.run_until_complete(self.__executeAsyncFunction(userDefinedFunction, parameterList))
+            result = loop.run_until_complete(self.__executeAsyncFunction(userDefinedFunction, parameterList, ipcExecutorConditionalCustomExecutorChannel))
 
         return result
 
@@ -140,7 +140,7 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
     #
     #     return result
 
-    def macosThreadExecutionFunction(self, userDefinedFunction, parameterList):
+    def macosThreadExecutionFunction(self, userDefinedFunction, parameterList, ipcExecutorConditionalCustomExecutorChannel):
         # Mac OS에서 Project Top으로 잡힘
         currentWorkDirectory = os.getcwd()
 
@@ -241,7 +241,7 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
 
         return data
 
-    def execute(self, requestObject):
+    def execute(self, requestObject, ipcExecutorConditionalCustomExecutorChannel):
         # ColorPrinter.print_important_data("CommandExecutor requestObject -> protocolNumber",
         #                                   requestObject.getProtocolNumber())
         # ColorPrinter.print_important_data("customFunction", self.__protocolTable[requestObject.getProtocolNumber()])
@@ -257,10 +257,12 @@ class CustomProtocolRepositoryImpl(CustomProtocolRepository):
             ColorPrinter.print_important_message("Coroutine Start")
             osType = OperatingSystemDetector.checkCurrentOperatingSystem()
             osDependentThreadExecuteFunction = self.__osDependentThreadExecutionTable[osType]
-            result = osDependentThreadExecuteFunction(userDefinedFunction, parameterList)
+            # result = osDependentThreadExecuteFunction(userDefinedFunction, parameterList)
+            result = osDependentThreadExecuteFunction(userDefinedFunction, parameterList, ipcExecutorConditionalCustomExecutorChannel)
         else:
             ColorPrinter.print_important_message("Non-Coroutine Start")
-            result = self.__executeSynchronizeFunction(userDefinedFunction, parameterList)
+            # result = self.__executeSynchronizeFunction(userDefinedFunction, parameterList)
+            result = self.__executeSynchronizeFunction(userDefinedFunction, parameterList, ipcExecutorConditionalCustomExecutorChannel)
             ColorPrinter.print_important_message("User Defined Protocol 함수는 반드시 async로 구성해야합니다")
 
         ColorPrinter.print_important_data("result", result)

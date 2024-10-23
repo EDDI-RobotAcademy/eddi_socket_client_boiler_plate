@@ -1,6 +1,8 @@
 from client_socket.service.client_socket_service_impl import ClientSocketServiceImpl
 from command_analyzer.service.command_analyzer_service_impl import CommandAnalyzerServiceImpl
 from command_executor.service.command_executor_service_impl import CommandExecutorServiceImpl
+from conditional_custom_executor.service.conditional_custom_executor_service_impl import \
+    ConditionalCustomExecutorServiceImpl
 from custom_protocol.entity.custom_protocol import CustomProtocolNumber
 from custom_protocol.service.custom_protocol_service_impl import CustomProtocolServiceImpl
 from dice.service.dice_service_impl import DiceServiceImpl
@@ -36,6 +38,7 @@ class DomainInitializer:
     def initIPCQueueDomain():
         ipcQueueService = IPCQueueServiceImpl.getInstance()
         ipcQueueService.createEssentialIPCQueue()
+        ipcQueueService.createOptionalIPCQueue()
 
     @staticmethod
     def initDiceDomain():
@@ -111,17 +114,33 @@ class DomainInitializer:
         ipcAnalyzerExecutorChannel = ipcQueueRepository.getIPCAnalyzerExecutorChannel()
         ipcExecutorTransmitterChannel = ipcQueueRepository.getIPCExecutorTransmitterChannel()
 
+        ipcExecutorConditionalCustomExecutorChannel = ipcQueueRepository.getIPCExecutorConditionalCustomExecutorChannel()
+
         commandExecutorService = CommandExecutorServiceImpl.getInstance()
         commandExecutorService.requestToInjectAnalyzerExecutorChannel(ipcAnalyzerExecutorChannel)
         commandExecutorService.requestToInjectExecutorTransmitterChannel(ipcExecutorTransmitterChannel)
+
+        commandExecutorService.requestToInjectExecutorConditionalCustomExecutorChannel(ipcExecutorConditionalCustomExecutorChannel)
+
+    @staticmethod
+    def initConditionalCustomExecutorDomain():
+        ipcQueueRepository = IPCQueueRepositoryImpl.getInstance()
+        ipcExecutorConditionalCustomExecutorChannel = ipcQueueRepository.getIPCExecutorConditionalCustomExecutorChannel()
+        ipcConditionalCustomExecutorTransmitterChannel = ipcQueueRepository.getIPCConditionalCustomExecutorTransmitterChannel()
+
+        conditionalCustomExecutorService = ConditionalCustomExecutorServiceImpl.getInstance()
+        conditionalCustomExecutorService.requestToInjectExecutorConditionalCustomExecutorChannel(ipcExecutorConditionalCustomExecutorChannel)
+        conditionalCustomExecutorService.requestToInjectConditionalCustomExecutorTransmitterChannel(ipcConditionalCustomExecutorTransmitterChannel)
 
     @staticmethod
     def initTransmitterDomain():
         ipcQueueRepository = IPCQueueRepositoryImpl.getInstance()
         ipcExecutorTransmitterChannel = ipcQueueRepository.getIPCExecutorTransmitterChannel()
+        ipcConditionalCustomExecutorTransmitterChannel = ipcQueueRepository.getIPCConditionalCustomExecutorTransmitterChannel()
 
         transmitterService = TransmitterServiceImpl.getInstance()
         transmitterService.requestToInjectExecutorTransmitterChannel(ipcExecutorTransmitterChannel)
+        transmitterService.requestToInjectConditionalCustomExecutorTransmitterChannel(ipcConditionalCustomExecutorTransmitterChannel)
 
     @staticmethod
     def initEachDomain():
@@ -141,5 +160,7 @@ class DomainInitializer:
         DomainInitializer.initCommandAnalyzerDomain()
         DomainInitializer.initCommandExecutorDomain()
         DomainInitializer.initTransmitterDomain()
+
+        DomainInitializer.initConditionalCustomExecutorDomain()
 
 
