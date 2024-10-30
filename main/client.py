@@ -57,21 +57,21 @@ if __name__ == "__main__":
 
         threadWorkerPoolService = ThreadWorkerPoolServiceImpl.getInstance()
 
-        for receiverId in range(6):
+        for receiverId in range(4):
             threadWorkerPoolService.executeThreadPoolWorker(
                 f"Receiver-{receiverId}",
                 partial(receiverService.requestToReceiveCommand, receiverId)
             )
 
             # Command Analyzer Thread Pool (6개)
-        for analyzerId in range(6):
+        for analyzerId in range(4):
             threadWorkerPoolService.executeThreadPoolWorker(
                 f"CommandAnalyzer-{analyzerId}",
                 partial(commandAnalyzerService.analysisCommand, analyzerId)
             )
 
             # Command Executor Thread Pool (5개)
-        for executorId in range(5):
+        for executorId in range(4):
             threadWorkerPoolService.executeThreadPoolWorker(
                 f"CommandExecutor-{executorId}",
                 partial(commandExecutorService.executeCommand, executorId)
